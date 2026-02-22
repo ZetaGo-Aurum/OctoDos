@@ -56,19 +56,19 @@
 git clone https://github.com/ZetaGo-Aurum/OctoDos.git
 cd OctoDos
 
-# Install dependencies
+# Install dependencies + auto-register global command
 npm install
-
-# Install globally (run octodos from anywhere)
-npm link
 ```
 
-After `npm link`, run **`octodos`** from any directory — no `node index.js` needed.
+After install, **`octodos`** is automatically registered as a global command — run it from anywhere. No extra steps needed.
 
 ### Requirements
 - **Node.js** ≥ 16.0
 - **npm** ≥ 8.0
 - Internet connection (for proxy fetching)
+
+> [!WARNING]
+> **CPU & RAM Warning:** The higher the thread count, the higher the CPU and RAM usage. At 5,000+ threads your system may slow down. At 10,000+ threads all CPU cores will be saturated. At 50,000+ threads your system **WILL freeze**. OctoDos displays real-time CPU/RAM warnings before each assault.
 
 ---
 

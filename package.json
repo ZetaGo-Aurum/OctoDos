@@ -8,7 +8,8 @@
   },
   "scripts": {
     "start": "node index.js",
-    "test": "node index.js --help"
+    "test": "node index.js --help",
+    "postinstall": "npm link"
   },
   "keywords": [
     "ddos",

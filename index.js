@@ -42,6 +42,43 @@ function resolveIntensity(flag) {
 }
 
 // ═══════════════════════════════════════════════════
+// CPU / RESOURCE WARNING
+// ═══════════════════════════════════════════════════
+function showCpuWarning(effectiveThreads) {
+    const os = require('os');
+    const cpus = os.cpus().length;
+    const totalMem = (os.totalmem() / 1073741824).toFixed(1);
+    const freeMem = (os.freemem() / 1073741824).toFixed(1);
+
+    console.log(chalk.gray(`\n  💻 System: ${cpus} CPU cores | ${totalMem}GB RAM (${freeMem}GB free)`));
+
+    if (effectiveThreads >= 50000) {
+        console.log(chalk.bgRed.white.bold('  ╔══════════════════════════════════════════════════════════════╗'));
+        console.log(chalk.bgRed.white.bold('  ║  ☠️  EXTREME WARNING — SYSTEM DESTRUCTION RISK              ║'));
+        console.log(chalk.bgRed.white.bold('  ╚══════════════════════════════════════════════════════════════╝'));
+        console.log(chalk.red.bold(`  ${effectiveThreads.toLocaleString()} threads will consume ALL CPU cores and RAM.`));
+        console.log(chalk.red.bold('  Your system WILL freeze. Network adapters may crash.'));
+        console.log(chalk.red('  This will generate MASSIVE traffic visible to ISPs and firewalls.'));
+        console.log(chalk.yellow(`  Estimated CPU: ${Math.min(100, Math.round(effectiveThreads / cpus))}% per core | Est. RAM: ${Math.round(effectiveThreads * 0.5)}MB+`));
+    } else if (effectiveThreads >= 10000) {
+        console.log(chalk.red.bold(`\n  ⚠️  CRITICAL: ${effectiveThreads.toLocaleString()} threads — VERY HIGH CPU/RAM usage!`));
+        console.log(chalk.red('  System may become unresponsive. All CPU cores will be saturated.'));
+        console.log(chalk.red('  Close unnecessary applications before proceeding.'));
+        console.log(chalk.yellow(`  Estimated CPU: ${Math.min(100, Math.round(effectiveThreads / cpus))}% per core | Est. RAM: ${Math.round(effectiveThreads * 0.3)}MB+`));
+    } else if (effectiveThreads >= 5000) {
+        console.log(chalk.hex('#FF8E53').bold(`\n  ⚠️  WARNING: ${effectiveThreads.toLocaleString()} threads — HIGH CPU usage expected.`));
+        console.log(chalk.hex('#FF8E53')('  CPU usage will spike significantly. System may slow down.'));
+        console.log(chalk.yellow(`  Estimated CPU: ${Math.min(100, Math.round(effectiveThreads / cpus))}% per core | Est. RAM: ${Math.round(effectiveThreads * 0.2)}MB+`));
+    } else if (effectiveThreads >= 1000) {
+        console.log(chalk.yellow(`\n  ⚠️  NOTE: ${effectiveThreads.toLocaleString()} threads — Moderate CPU usage.`));
+        console.log(chalk.yellow(`  Estimated CPU: ~${Math.min(100, Math.round(effectiveThreads / cpus))}% per core | Est. RAM: ${Math.round(effectiveThreads * 0.1)}MB+`));
+    } else {
+        console.log(chalk.green(`\n  ✅ ${effectiveThreads} threads — CPU usage: Low. System will remain stable.`));
+    }
+    console.log('');
+}
+
+// ═══════════════════════════════════════════════════
 // TARGET DETECTION
 // ═══════════════════════════════════════════════════
 function isUrl(str) {
@@ -158,6 +195,7 @@ async function getTargetConfig(skipAdvanced = false) {
 
     const multipliers = { low: 0.5, medium: 1, high: 2, critical: 3, auto: 1.5 };
     answers.effectiveThreads = Math.max(1, Math.round(answers.threads * (multipliers[answers.intensity] || 1)));
+    showCpuWarning(answers.effectiveThreads);
     return answers;
 }
 
@@ -346,6 +384,8 @@ async function cliMode(target, threads, time, intensityFlag) {
     console.log(chalk.white(`  Duration:    ${d}s`));
     console.log(chalk.white(`  Intensity:   ${intensity.name.toUpperCase()} (${intensityFlag || '--med'})`));
     console.log(chalk.white(`  Proxy:       Enabled (auto)\n`));
+
+    showCpuWarning(effectiveThreads);
 
     const config = { target: nt, threads: t, effectiveThreads, time: d, isL7, useProxy: true, intensity: intensity.name };
     await acceptTerms();

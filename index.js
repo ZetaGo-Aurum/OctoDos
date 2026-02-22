@@ -17,11 +17,12 @@ process.removeAllListeners('warning');
 
 // ── CRASH SHIELD (Prevents Node.js from dying on OS network errors) ──
 process.on('uncaughtException', (err) => {
-    // Ignore routine network errors from the OS during massive flooding
     if (err.code === 'ECONNRESET' || err.code === 'EPIPE' || err.code === 'ENOTFOUND' || err.code === 'ETIMEDOUT') return;
+    console.error(chalk.red('\n[FATAL ERROR]'), err); // Print real crashes
 });
 process.on('unhandledRejection', (err) => {
-    if (err.code === 'ECONNRESET' || err.code === 'EPIPE' || err.code === 'ENOTFOUND' || err.code === 'ETIMEDOUT') return;
+    if (err && (err.code === 'ECONNRESET' || err.code === 'EPIPE' || err.code === 'ENOTFOUND' || err.code === 'ETIMEDOUT')) return;
+    console.error(chalk.red('\n[PROMISE REJECTION]'), err); // Print real crashes
 });
 
 const PROGRAM_NAME = 'octodos';
@@ -445,7 +446,7 @@ async function main() {
     // CLI mode: octodos <url/ip> <threads> <duration> [--intensity]
     if (cleanArgs.length >= 3 && !cleanArgs[0].startsWith('-')) {
         await cliMode(cleanArgs[0], cleanArgs[1], cleanArgs[2], intensityFlag || '--med');
-    } else if (cleanArgs.length === 1 && (cleanArgs[0] === '--help' || cleanArgs[0] === '-h')) {
+    } else if (cleanArgs.length === 1 && (cleanArgs[0] === '--help' || cleanArgs[0] === '-h' || cleanArgs[0] === '--h')) {
         showBanner();
         console.log(chalk.white('  Usage:'));
         console.log(chalk.cyan('    octodos                                          ') + chalk.gray('Interactive menu'));

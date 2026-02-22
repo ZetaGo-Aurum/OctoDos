@@ -33,6 +33,8 @@
     "cli-table3": "^0.6.5",
     "figlet": "^1.8.0",
     "gradient-string": "^2.0.2",
+    "http-proxy-agent": "^7.0.2",
+    "https-proxy-agent": "^7.0.6",
     "inquirer": "^8.2.6",
     "ora": "^5.4.1"
   }

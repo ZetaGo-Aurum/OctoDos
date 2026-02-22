@@ -13,6 +13,18 @@
  * ║  Unauthorized use is a criminal offense.                     ║
  * ╚═══════════════════════════════════════════════════════════════╝
  */
+process.removeAllListeners('warning');
+
+// ── CRASH SHIELD (Prevents Node.js from dying on OS network errors) ──
+process.on('uncaughtException', (err) => {
+    // Ignore routine network errors from the OS during massive flooding
+    if (err.code === 'ECONNRESET' || err.code === 'EPIPE' || err.code === 'ENOTFOUND' || err.code === 'ETIMEDOUT') return;
+});
+process.on('unhandledRejection', (err) => {
+    if (err.code === 'ECONNRESET' || err.code === 'EPIPE' || err.code === 'ENOTFOUND' || err.code === 'ETIMEDOUT') return;
+});
+
+const PROGRAM_NAME = 'octodos';
 const chalk = require('chalk');
 const inquirer = require('inquirer');
 const ora = require('ora');

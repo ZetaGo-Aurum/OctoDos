@@ -51,8 +51,8 @@
 
 ```bash
 # Clone the repository
-git clone <repo-url>
-cd octodos
+git clone https://github.com/ZetaGo-Aurum/OctoDos.git
+cd OctoDos
 
 # Install dependencies
 npm install

@@ -1,0 +1,44 @@
+{
+  "id": "OCT-WACZ-BKLD",
+  "tool": "OctoDos v1.0.0",
+  "operator": "ZetaGo-Aurum",
+  "timestamp": "2026-02-22T06:37:44.047Z",
+  "target": "http://localhost:8080",
+  "mode": "L7",
+  "duration": 5,
+  "threads": 1,
+  "intensity": "medium",
+  "proxyCount": 0,
+  "recon": {
+    "resolvedIps": [],
+    "leakedIps": [],
+    "wafDetected": null,
+    "proxies": [],
+    "technologies": [],
+    "securityIssues": 0,
+    "dnsRecords": {}
+  },
+  "audit": {
+    "totalRequests": 18,
+    "successful": 0,
+    "failed": 21,
+    "rps": 1,
+    "elapsed": 31.16,
+    "statusCodes": {},
+    "methodsUsed": [
+      "HTTP-FLOOD",
+      "SLOWLORIS",
+      "RUDY",
+      "HTTP-DESYNC",
+      "CHUNKED",
+      "BROWSER-EMU",
+      "CACHE-BUST",
+      "MULTIPART",
+      "HEAD-FLOOD",
+      "PIPELINE"
+    ],
+    "dataBytesSent": 0
+  },
+  "threatLevel": 0,
+  "summary": "CLI L7 audit | 1 threads | 5s | medium"
+}

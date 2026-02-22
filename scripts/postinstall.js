@@ -10,11 +10,31 @@ const path = require('path');
 const fs = require('fs');
 
 function getGlobalBinDir() {
+    // Method 1: npm prefix (most reliable)
     try {
-        return execSync('npm bin -g', { encoding: 'utf-8', timeout: 10000 }).trim();
-    } catch {
-        return null;
+        const prefix = execSync('npm config get prefix', { encoding: 'utf-8', timeout: 10000, stdio: ['pipe', 'pipe', 'pipe'] }).trim();
+        if (prefix) {
+            const isWindows = process.platform === 'win32';
+            const binDir = isWindows ? prefix : path.join(prefix, 'bin');
+            if (fs.existsSync(isWindows ? prefix : path.dirname(binDir))) return binDir;
+        }
+    } catch {}
+
+    // Method 2: npm bin -g
+    try {
+        const dir = execSync('npm bin -g', { encoding: 'utf-8', timeout: 10000, stdio: ['pipe', 'pipe', 'pipe'] }).trim();
+        if (dir && fs.existsSync(path.dirname(dir))) return dir;
+    } catch {}
+
+    // Method 3: well-known paths
+    if (process.platform !== 'win32') {
+        const knownPaths = ['/usr/local/bin', '/usr/bin', `${process.env.HOME}/.npm-global/bin`];
+        for (const p of knownPaths) {
+            if (fs.existsSync(p)) return p;
+        }
     }
+
+    return null;
 }
 
 function register() {
@@ -27,15 +47,19 @@ function register() {
     const entryFile = path.resolve(__dirname, '..', 'index.js');
     const isWindows = process.platform === 'win32';
 
+    // Ensure index.js has execute permission on Unix
+    if (!isWindows) {
+        try {
+            fs.chmodSync(entryFile, '755');
+        } catch {}
+    }
+
     if (isWindows) {
         // Create .cmd shim for Windows
         const cmdShim = path.join(binDir, 'octodos.cmd');
-        const psShim = path.join(binDir, 'octodos.ps1');
         const shContent = `@ECHO off\r\nGOTO start\r\n:find_dp0\r\nSET dp0=%~dp0\r\nEXIT /b\r\n:start\r\nSETLOCAL\r\nCALL :find_dp0\r\nIF EXIST "%dp0%\\node.exe" (\r\n  SET "_prog=%dp0%\\node.exe"\r\n) ELSE (\r\n  SET "_prog=node"\r\n  SET PATHEXT=%PATHEXT:;.JS;=;%\r\n)\r\nendLocal & goto #_undefined_# 2>NUL || title %COMSPEC% & "%_prog%"  "${entryFile}" %*\r\n`;
-        const psContent = `#!/usr/bin/env pwsh\r\n$basedir=Split-Path $MyInvocation.MyCommand.Definition -Parent\r\n$exe=""\r\nif ($PSVersionTable.PSVersion -lt "6.0" -or $IsWindows) {\r\n  $exe=".exe"\r\n}\r\n$ret=0\r\nif (Test-Path "$basedir/node$exe") {\r\n  if ($MyInvocation.ExpectingInput) {\r\n    $input | & "$basedir/node$exe"  "${entryFile}" $args\r\n  } else {\r\n    & "$basedir/node$exe"  "${entryFile}" $args\r\n  }\r\n  $ret=$LASTEXITCODE\r\n} else {\r\n  if ($MyInvocation.ExpectingInput) {\r\n    $input | & "node$exe"  "${entryFile}" $args\r\n  } else {\r\n    & "node$exe"  "${entryFile}" $args\r\n  }\r\n  $ret=$LASTEXITCODE\r\n}\r\nexit $ret\r\n`;
         try {
             fs.writeFileSync(cmdShim, shContent);
-            fs.writeFileSync(psShim, psContent);
             console.log(`  ✅ Registered "octodos" as global command`);
             console.log(`     Location: ${cmdShim}`);
         } catch (e) {
@@ -45,16 +69,18 @@ function register() {
         // Unix: create symlink
         const linkPath = path.join(binDir, 'octodos');
         try {
-            // Remove existing link if present
+            // Remove existing link/file if present
             try { fs.unlinkSync(linkPath); } catch {}
             fs.symlinkSync(entryFile, linkPath);
-            fs.chmodSync(linkPath, '755');
+            // Ensure symlink target is executable
+            try { fs.chmodSync(entryFile, '755'); } catch {}
             console.log(`  ✅ Registered "octodos" as global command`);
-            console.log(`     Location: ${linkPath}`);
+            console.log(`     Symlink: ${linkPath} -> ${entryFile}`);
         } catch (e) {
             if (e.code === 'EACCES') {
-                console.log('  [i] Permission denied. To register globally, run:');
+                console.log('  [i] Permission denied for auto-register. To register globally, run:');
                 console.log('      sudo npm link');
+                console.log('      # or: sudo ln -sf ' + entryFile + ' ' + linkPath);
             } else {
                 console.log(`  [i] Could not auto-register (${e.code || e.message}). Run "npm link" manually.`);
             }
@@ -63,10 +89,7 @@ function register() {
 }
 
 // Only run if this is a local install (not from npm registry)
-// Check if we're inside node_modules (registry install) vs direct clone
 const isDirectInstall = !__dirname.includes('node_modules');
 if (isDirectInstall) {
     register();
-} else {
-    // Installed from npm registry — skip auto-link
 }

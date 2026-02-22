@@ -34,10 +34,10 @@
 
 | Feature | Description |
 |---------|-------------|
-| � **REAL IMPACT** | Every method sends **real network traffic** — actual HTTP requests, raw TCP/UDP packets. Not a simulation. |
-| �🐙 **Octopus Tentacle Engine** | 20 methods attack simultaneously — coordinated multi-vector storm |
+| **REAL IMPACT** | Every method sends **real network traffic** — actual HTTP requests, raw TCP/UDP packets. Not a simulation. |
+| 🐙 **Octopus Tentacle Engine** | 20 methods attack simultaneously — coordinated multi-vector storm |
 | 🔥 **20 Attack Methods** | 10 L7 + 10 L4 methods for comprehensive application & transport layer coverage |
-| ♾️ **No Thread Limit** | Unlimited threads — use 100, 5000, or 50000. Your hardware is the only limit. |
+| **No Thread Limit** | Unlimited threads — use 100, 5000, or 50000. Your hardware is the only limit. |
 | 🛡️ **Anti-WAF Engine** | 30+ User-Agents, cookie simulation, Cloudflare bypass, header mutation |
 | 🔄 **Proxy Rotation** | 8,000+ proxies (HTTP/SOCKS4/SOCKS5) from 14 sources |
 | 🔍 **Deep Recon** | DNS/MX/SPF/CT lookup, 99+ subdomains, 11 WAF detections |

@@ -27,6 +27,21 @@ const { showBanner, showMethodTable, showEngines, showDisclaimer, showAuditSumma
 const { getMethodCount } = require('./lib/methods');
 
 // ═══════════════════════════════════════════════════
+// INTENSITY FLAGS
+// ═══════════════════════════════════════════════════
+const INTENSITY_MAP = {
+    '--low': { name: 'low', multiplier: 0.5 },
+    '--med': { name: 'medium', multiplier: 1 },
+    '--high': { name: 'high', multiplier: 2 },
+    '--crit': { name: 'critical', multiplier: 3 },
+    '--auto': { name: 'auto', multiplier: 1.5 },
+};
+
+function resolveIntensity(flag) {
+    return INTENSITY_MAP[flag] || INTENSITY_MAP['--med'];
+}
+
+// ═══════════════════════════════════════════════════
 // TARGET DETECTION
 // ═══════════════════════════════════════════════════
 function isUrl(str) {
@@ -93,7 +108,7 @@ async function returnToMenu() {
 }
 
 // ═══════════════════════════════════════════════════
-// TARGET INPUT PROMPTS
+// TARGET INPUT PROMPTS (No thread limit)
 // ═══════════════════════════════════════════════════
 async function getTargetConfig(skipAdvanced = false) {
     const questions = [
@@ -104,15 +119,15 @@ async function getTargetConfig(skipAdvanced = false) {
         },
         {
             type: 'number', name: 'threads',
-            message: chalk.cyan('Number of threads:'),
-            default: 50,
-            validate: (v) => v > 0 && v <= 500 ? true : 'Threads must be 1-500',
+            message: chalk.cyan('Number of threads (no limit):'),
+            default: 100,
+            validate: (v) => v > 0 ? true : 'Threads must be > 0',
         },
         {
             type: 'number', name: 'time',
             message: chalk.cyan('Duration (seconds):'),
-            default: 30,
-            validate: (v) => v > 0 && v <= 3600 ? true : 'Duration must be 1-3600',
+            default: 60,
+            validate: (v) => v > 0 ? true : 'Duration must be > 0',
         },
     ];
 
@@ -126,10 +141,11 @@ async function getTargetConfig(skipAdvanced = false) {
                 type: 'list', name: 'intensity',
                 message: chalk.cyan('Audit intensity:'),
                 choices: [
-                    { name: `${chalk.green('●')} Low (Conservative, safe)`, value: 'low' },
-                    { name: `${chalk.yellow('●')} Medium (Standard pentest)`, value: 'medium' },
-                    { name: `${chalk.red('●')} High (Aggressive, max impact)`, value: 'high' },
-                    { name: `${chalk.hex('#FF0000')('●')} Critical (Full power, all 20 vectors)`, value: 'critical' },
+                    { name: `${chalk.green('●')} Low (0.5x threads — conservative)`, value: 'low' },
+                    { name: `${chalk.yellow('●')} Medium (1x threads — standard)`, value: 'medium' },
+                    { name: `${chalk.red('●')} High (2x threads — aggressive)`, value: 'high' },
+                    { name: `${chalk.hex('#FF0000')('●')} Critical (3x threads — maximum firepower)`, value: 'critical' },
+                    { name: `${chalk.hex('#00C9FF')('●')} Auto (1.5x threads — adaptive)`, value: 'auto' },
                 ], default: 'medium',
             }
         );
@@ -140,8 +156,8 @@ async function getTargetConfig(skipAdvanced = false) {
     answers.isL7 = isUrl(answers.target);
     if (skipAdvanced) { answers.useProxy = true; answers.intensity = 'medium'; }
 
-    const multipliers = { low: 0.5, medium: 1, high: 2, critical: 3 };
-    answers.effectiveThreads = Math.min(500, Math.max(1, Math.round(answers.threads * (multipliers[answers.intensity] || 1))));
+    const multipliers = { low: 0.5, medium: 1, high: 2, critical: 3, auto: 1.5 };
+    answers.effectiveThreads = Math.max(1, Math.round(answers.threads * (multipliers[answers.intensity] || 1)));
     return answers;
 }
 
@@ -173,7 +189,6 @@ async function startFullAudit() {
 
     const logger = new AuditLogger(config.target);
 
-    // Phase 0: Proxy
     if (config.useProxy) {
         showPhaseHeader(0, 'PROXY ACQUISITION', '🔄');
         const spinner = ora({ text: chalk.cyan('Fetching proxy pool from multiple sources...'), spinner: 'dots12' }).start();
@@ -183,30 +198,26 @@ async function startFullAudit() {
         logger.logProxy(ps.http, ps.socks4, ps.socks5, ps.total);
     }
 
-    // Phase 1: Recon
     showPhaseHeader(1, 'DEEP RECONNAISSANCE', '🔍');
     const reconData = await runRecon(config.target);
     logger.logRecon(reconData);
 
-    // Phase 2: Audit
-    showPhaseHeader(2, config.isL7 ? 'L7 OCTOPUS TENTACLE AUDIT — 10 METHODS' : 'L4 OCTOPUS TENTACLE AUDIT — 10 METHODS', '🐙');
+    showPhaseHeader(2, config.isL7 ? 'L7 OCTOPUS TENTACLE ASSAULT — 10 METHODS' : 'L4 OCTOPUS TENTACLE ASSAULT — 10 METHODS', '🐙');
     let auditStats;
     if (config.isL7) auditStats = await startL7(config.target, config.effectiveThreads, config.time);
     else auditStats = await startL4(config.target, config.effectiveThreads, config.time);
     logger.logAudit(auditStats, config.isL7);
 
-    // Phase 3: Defense
     showPhaseHeader(3, 'DEFENSIVE ANALYSIS', '🛡️');
     const threatLevel = getRecommendations(config.target, reconData, auditStats, config.isL7);
 
-    // Save result
     const saved = saveResult({
         target: config.target, mode: config.isL7 ? 'L7' : 'L4',
         duration: config.time, threads: config.effectiveThreads, intensity: config.intensity,
         proxyCount: config.useProxy ? getProxyStats().total : 0,
         recon: reconData, audit: auditStats, threatLevel: threatLevel || 0,
         methodsUsed: auditStats.methodsUsed || [],
-        summary: `Full ${config.isL7 ? 'L7' : 'L4'} audit with ${config.effectiveThreads} threads for ${config.time}s`,
+        summary: `Full ${config.isL7 ? 'L7' : 'L4'} audit | ${config.effectiveThreads} threads | ${config.time}s | ${config.intensity}`,
     });
     if (saved) console.log(chalk.gray(`  📂 Result saved: ${saved.filename} (ID: ${saved.id})`));
 
@@ -317,16 +328,26 @@ function showCredits() {
 }
 
 // ═══════════════════════════════════════════════════
-// CLI MODE: octodos <url/ip> <threads> <time>
+// CLI MODE: octodos <url/ip> <threads> <duration> [--intensity]
 // ═══════════════════════════════════════════════════
-async function cliMode(target, threads, time) {
+async function cliMode(target, threads, time, intensityFlag) {
     const nt = normalizeTarget(target);
     const isL7 = isUrl(nt);
-    const t = parseInt(threads) || 50;
-    const d = parseInt(time) || 30;
+    const t = parseInt(threads) || 100;
+    const d = parseInt(time) || 60;
+    const intensity = resolveIntensity(intensityFlag);
+    const effectiveThreads = Math.max(1, Math.round(t * intensity.multiplier));
 
     showBanner();
-    const config = { target: nt, threads: t, effectiveThreads: t, time: d, isL7, useProxy: true, intensity: 'medium' };
+    console.log(chalk.hex('#a855f7').bold('  ── CLI Direct Mode ──\n'));
+    console.log(chalk.white(`  Target:      ${nt}`));
+    console.log(chalk.white(`  Mode:        ${isL7 ? 'Layer 7 (Application)' : 'Layer 4 (Transport)'}`));
+    console.log(chalk.white(`  Threads:     ${t} × ${intensity.multiplier}x = ${effectiveThreads} effective`));
+    console.log(chalk.white(`  Duration:    ${d}s`));
+    console.log(chalk.white(`  Intensity:   ${intensity.name.toUpperCase()} (${intensityFlag || '--med'})`));
+    console.log(chalk.white(`  Proxy:       Enabled (auto)\n`));
+
+    const config = { target: nt, threads: t, effectiveThreads, time: d, isL7, useProxy: true, intensity: intensity.name };
     await acceptTerms();
     showAuditSummary(config);
 
@@ -343,14 +364,14 @@ async function cliMode(target, threads, time) {
     const reconData = await runRecon(nt);
     logger.logRecon(reconData);
 
-    showPhaseHeader(2, isL7 ? 'L7 OCTOPUS TENTACLE AUDIT' : 'L4 OCTOPUS TENTACLE AUDIT', '🐙');
-    let auditStats = isL7 ? await startL7(nt, t, d) : await startL4(nt, t, d);
+    showPhaseHeader(2, isL7 ? 'L7 OCTOPUS TENTACLE ASSAULT' : 'L4 OCTOPUS TENTACLE ASSAULT', '🐙');
+    let auditStats = isL7 ? await startL7(nt, effectiveThreads, d) : await startL4(nt, effectiveThreads, d);
     logger.logAudit(auditStats, isL7);
 
     showPhaseHeader(3, 'DEFENSIVE ANALYSIS', '🛡️');
     const threatLevel = getRecommendations(nt, reconData, auditStats, isL7);
 
-    const saved = saveResult({ target: nt, mode: isL7 ? 'L7' : 'L4', duration: d, threads: t, recon: reconData, audit: auditStats, threatLevel: threatLevel || 0, methodsUsed: auditStats.methodsUsed || [], summary: `CLI ${isL7 ? 'L7' : 'L4'} audit` });
+    const saved = saveResult({ target: nt, mode: isL7 ? 'L7' : 'L4', duration: d, threads: effectiveThreads, intensity: intensity.name, recon: reconData, audit: auditStats, threatLevel: threatLevel || 0, methodsUsed: auditStats.methodsUsed || [], summary: `CLI ${isL7 ? 'L7' : 'L4'} audit | ${effectiveThreads} threads | ${d}s | ${intensity.name}` });
     if (saved) console.log(chalk.gray(`  📂 Result saved: ${saved.filename}`));
 
     logger.finalize({ recon: reconData, audit: auditStats });
@@ -363,18 +384,34 @@ async function cliMode(target, threads, time) {
 async function main() {
     const args = process.argv.slice(2);
 
-    if (args.length >= 3) {
-        await cliMode(args[0], args[1], args[2]);
-    } else if (args.length === 1 && (args[0] === '--help' || args[0] === '-h')) {
+    // Parse intensity flag from args
+    const intensityFlags = ['--low', '--med', '--high', '--crit', '--auto'];
+    const flagIndex = args.findIndex(a => intensityFlags.includes(a));
+    const intensityFlag = flagIndex !== -1 ? args[flagIndex] : null;
+    const cleanArgs = args.filter(a => !intensityFlags.includes(a));
+
+    // CLI mode: octodos <url/ip> <threads> <duration> [--intensity]
+    if (cleanArgs.length >= 3 && !cleanArgs[0].startsWith('-')) {
+        await cliMode(cleanArgs[0], cleanArgs[1], cleanArgs[2], intensityFlag || '--med');
+    } else if (cleanArgs.length === 1 && (cleanArgs[0] === '--help' || cleanArgs[0] === '-h')) {
         showBanner();
         console.log(chalk.white('  Usage:'));
-        console.log(chalk.cyan('    octodos                          ') + chalk.gray('Interactive menu'));
-        console.log(chalk.cyan('    octodos <url/ip> <threads> <time> ') + chalk.gray('Direct CLI mode'));
-        console.log(chalk.cyan('    octodos --results                ') + chalk.gray('View audit history'));
+        console.log(chalk.cyan('    octodos                                          ') + chalk.gray('Interactive menu'));
+        console.log(chalk.cyan('    octodos <url/ip> <threads> <duration> [--flag]   ') + chalk.gray('Direct CLI mode'));
+        console.log(chalk.cyan('    octodos --results                                ') + chalk.gray('View audit history'));
+        console.log('');
+        console.log(chalk.white('  Intensity Flags:'));
+        console.log(chalk.green('    --low       ') + chalk.gray('0.5x threads — conservative'));
+        console.log(chalk.yellow('    --med       ') + chalk.gray('1x threads — standard (default)'));
+        console.log(chalk.red('    --high      ') + chalk.gray('2x threads — aggressive'));
+        console.log(chalk.hex('#FF0000')('    --crit      ') + chalk.gray('3x threads — maximum firepower'));
+        console.log(chalk.cyan('    --auto      ') + chalk.gray('1.5x threads — adaptive'));
         console.log('');
         console.log(chalk.white('  Examples:'));
         console.log(chalk.gray('    octodos https://example.com 50 30'));
-        console.log(chalk.gray('    octodos 192.168.1.1:80 100 60'));
+        console.log(chalk.gray('    octodos https://localhost:3000 5000 120 --high'));
+        console.log(chalk.gray('    octodos 192.168.1.1:80 10000 60 --crit'));
+        console.log(chalk.gray('    octodos https://target.com 200 300 --auto'));
         console.log('');
         console.log(chalk.white('  Options:'));
         console.log(chalk.gray('    --help, -h       Show this help'));
@@ -382,12 +419,14 @@ async function main() {
         console.log(chalk.gray('    --results        Show audit history'));
         console.log(chalk.gray('    --methods        Show all 20 methods'));
         console.log('');
-    } else if (args.length === 1 && (args[0] === '--version' || args[0] === '-v')) {
+        console.log(chalk.yellow('  ⚠ No thread limit. Use responsibly with authorization only.'));
+        console.log('');
+    } else if (cleanArgs.length === 1 && (cleanArgs[0] === '--version' || cleanArgs[0] === '-v')) {
         console.log('OctoDos v1.0.0 by ZetaGo-Aurum');
-    } else if (args.length === 1 && args[0] === '--results') {
+    } else if (cleanArgs.length === 1 && cleanArgs[0] === '--results') {
         showBanner();
         showResults();
-    } else if (args.length === 1 && args[0] === '--methods') {
+    } else if (cleanArgs.length === 1 && cleanArgs[0] === '--methods') {
         showBanner();
         showMethodTable();
     } else {

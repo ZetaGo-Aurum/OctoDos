@@ -34,8 +34,10 @@
 
 | Feature | Description |
 |---------|-------------|
-| 🐙 **Octopus Tentacle Engine** | 20 methods work together like octopus tentacles — coordinated multi-vector storm |
+| � **REAL IMPACT** | Every method sends **real network traffic** — actual HTTP requests, raw TCP/UDP packets. Not a simulation. |
+| �🐙 **Octopus Tentacle Engine** | 20 methods attack simultaneously — coordinated multi-vector storm |
 | 🔥 **20 Attack Methods** | 10 L7 + 10 L4 methods for comprehensive application & transport layer coverage |
+| ♾️ **No Thread Limit** | Unlimited threads — use 100, 5000, or 50000. Your hardware is the only limit. |
 | 🛡️ **Anti-WAF Engine** | 30+ User-Agents, cookie simulation, Cloudflare bypass, header mutation |
 | 🔄 **Proxy Rotation** | 8,000+ proxies (HTTP/SOCKS4/SOCKS5) from 14 sources |
 | 🔍 **Deep Recon** | DNS/MX/SPF/CT lookup, 99+ subdomains, 11 WAF detections |
@@ -43,7 +45,7 @@
 | 📂 **Results History** | JSON audit history in `/results` — never lose a report |
 | 📝 **Audit Logger** | Forensic-grade timestamped `.log` + `.json` exports |
 | 🎨 **Interactive Menu** | Professional terminal UI with gradients and ASCII art |
-| ⚡ **Global CLI** | `octodos <url> <threads> <time>` from any directory |
+| ⚡ **Global CLI** | `octodos <url> <threads> <duration> [--intensity]` from any directory |
 
 ---
 
@@ -87,14 +89,28 @@ Menu options:
 
 ### CLI Mode
 ```bash
-octodos <target> <threads> <duration>
+octodos <url/ip> <threads> <duration> [--intensity]
 
 # Examples:
-octodos https://example.com 50 30     # L7 audit
-octodos 192.168.1.1:80 100 60         # L4 audit
+octodos https://example.com 50 30                # L7 audit (default --med)
+octodos https://localhost:3000 5000 120 --high    # L7 with 2x threads
+octodos 192.168.1.1:80 10000 60 --crit            # L4 with 3x threads
+octodos https://target.com 200 300 --auto          # Auto-adaptive 1.5x
 ```
 
-### Flags
+### Intensity Flags
+
+| Flag | Multiplier | Description |
+|------|-----------|-------------|
+| `--low` | 0.5x | Conservative — safe testing |
+| `--med` | 1x | Standard pentest (default) |
+| `--high` | 2x | Aggressive — high impact |
+| `--crit` | 3x | Maximum firepower — full assault |
+| `--auto` | 1.5x | Adaptive — balanced aggression |
+
+> **Example:** `octodos https://localhost:3000 5000 120 --high` uses **5000 × 2 = 10,000 effective threads**
+
+### Other Flags
 ```bash
 octodos --help        # Show usage
 octodos --version     # Show version

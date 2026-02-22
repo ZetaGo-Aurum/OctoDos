@@ -56,11 +56,14 @@
 git clone https://github.com/ZetaGo-Aurum/OctoDos.git
 cd OctoDos
 
-# Install dependencies + auto-register global command
+# Install dependencies
 npm install
+
+# Register as global CLI command (optional)
+npm link
 ```
 
-After install, **`octodos`** is automatically registered as a global command — run it from anywhere. No extra steps needed.
+After `npm link`, run **`octodos`** from any directory. Or use `node index.js` directly.
 
 ### Requirements
 - **Node.js** ≥ 16.0

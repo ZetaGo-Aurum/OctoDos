@@ -31,23 +31,32 @@ function showBanner() {
     const banner = figlet.textSync('OCTOSCRAPE', { font: 'ANSI Shadow', horizontalLayout: 'default' });
     console.log(gradient.passion(banner));
     console.log(DIM('  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'));
-    console.log(PINK.bold('  🕷️  OctoScrape v1.0.0 — Deep Web Data Extraction Engine'));
-    console.log(DIM('  Created by ZetaGo-Aurum | 9 Modules | OctoRecon Integration'));
+    console.log(PINK.bold('  🕷️  OctoScrape v2.0.0 — Aggressive Deep Web Data Extraction'));
+    console.log(DIM('  Created by ZetaGo-Aurum | 16 Modules | OctoRecon v2 Integration'));
     console.log(DIM('  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'));
 
-    console.log(PINK('\n  🔬 Extraction Modules:'));
-    console.log(DIM('    ├── 📄 Source Code      — Full HTML, inline JS/CSS, comments'));
-    console.log(DIM('    ├── 🖼️  Page Assets      — JS, CSS, images, fonts, media, iframes'));
-    console.log(DIM('    ├── 🍪 Cookies          — All cookies with HttpOnly/Secure/SameSite'));
-    console.log(DIM('    ├── 🔒 Security Stack   — Headers audit, CORS, CSP analysis'));
-    console.log(DIM('    ├── ⚙️  Tech Stack       — Server, CMS, frameworks, libraries'));
-    console.log(DIM('    ├── 📂 Config Files     — .env, .git, robots.txt, wp-config, 50+ paths'));
-    console.log(DIM('    ├── 📝 Forms & Inputs   — Form actions, methods, hidden fields'));
-    console.log(DIM('    ├── 🔗 Links & Sitemap  — Internal/external links, emails, anchors'));
-    console.log(DIM('    └── 🏷️  Metadata & SEO   — Title, OG, Twitter, JSON-LD, canonical'));
+    console.log(PINK('\n  🔬 Core Extractors:'));
+    console.log(DIM('    ├── 📄 Source Code       — Full HTML, inline JS/CSS, comments'));
+    console.log(DIM('    ├── 🖼️  Page Assets       — JS, CSS, images, fonts, media, iframes'));
+    console.log(DIM('    ├── 🍪 Cookies           — All cookies with HttpOnly/Secure/SameSite flags'));
+    console.log(DIM('    ├── 🔒 Security Stack    — Headers, CORS, CSP deep analysis'));
+    console.log(DIM('    ├── ⚙️  Tech Stack        — Server, CMS, framework, library detection'));
+    console.log(DIM('    ├── 📂 Config Probing    — 75+ sensitive paths (.env, .git, wp-config, swagger)'));
+    console.log(DIM('    ├── 📝 Forms & Inputs    — Actions, methods, hidden fields, CSRF tokens'));
+    console.log(DIM('    ├── 🔗 Links & Sitemap   — Internal/external links, email harvesting'));
+    console.log(DIM('    └── 🏷️  Metadata & SEO    — OG, Twitter Cards, JSON-LD, canonical'));
+    console.log(PINK('\n  💀 Aggressive Modules:'));
+    console.log(DIM('    ├── 💉 Hydration Decoder — Next.js, Nuxt, Remix, Gatsby, React state breaking'));
+    console.log(DIM('    ├── 🗺️  Source Maps       — .map file extraction → original source code'));
+    console.log(DIM('    ├── 🔌 API Discovery     — fetch/axios endpoints in client bundles'));
+    console.log(DIM('    ├── 🔑 Env Leak Scanner  — API keys, AWS/Stripe/GitHub tokens, JWT'));
+    console.log(DIM('    ├── 📊 GraphQL Introspect — Schema dump, types, mutations exposure'));
+    console.log(DIM('    ├── 🎫 Token Extraction  — CSRF, session cookies, nonces'));
+    console.log(DIM('    └── 📦 Chunk Analyzer    — Webpack/Vite bundle structure, build info'));
 
-    console.log(chalk.red.bold('\n  ⚠ WARNING: Data extraction without authorization is ILLEGAL.'));
-    console.log(chalk.red('  You MUST have explicit written permission from the target owner.\n'));
+    console.log(chalk.red.bold('\n  ⚠ EXTREME WARNING: This tool performs AGGRESSIVE data extraction.'));
+    console.log(chalk.red('  Unauthorized use = DATA THEFT. Criminal offense worldwide.'));
+    console.log(chalk.red('  You MUST have EXPLICIT WRITTEN AUTHORIZATION.\n'));
 }
 
 // ── Output Formatters ──
@@ -479,6 +488,235 @@ function printResults(results) {
         console.log();
     }
 
+    // ── HYDRATION / CHUNK DECODER ──
+    if (m.hydration) {
+        console.log(SEP);
+        console.log(chalk.red.bold('  💉 HYDRATION & CHUNK DECODER'));
+        console.log(SEP);
+
+        if (m.hydration.nextjs) {
+            console.log(chalk.red('  ⚠ Next.js __NEXT_DATA__ EXPOSED'));
+            const nd = typeof m.hydration.nextjs === 'object' && m.hydration.nextjs.raw ? m.hydration.nextjs.raw : JSON.stringify(m.hydration.nextjs, null, 2);
+            const lines = nd.substring(0, 2000).split('\n');
+            lines.forEach(l => console.log(chalk.white(`     ${l}`)));
+            if (nd.length > 2000) console.log(DIM(`     ... (${(nd.length/1024).toFixed(1)}KB total)`));
+            console.log();
+        }
+        if (m.hydration.nuxt) {
+            console.log(chalk.red(`  ⚠ Nuxt.js __NUXT__ ${m.hydration.nuxt.type || 'STATE'} EXPOSED`));
+            console.log(chalk.white(`     ${m.hydration.nuxt.raw.substring(0, 1000)}`));
+            console.log();
+        }
+        if (m.hydration.remix) {
+            console.log(chalk.red('  ⚠ Remix __remixContext EXPOSED'));
+            console.log(chalk.white(`     ${m.hydration.remix.raw.substring(0, 1000)}`));
+            console.log();
+        }
+        if (m.hydration.gatsby) {
+            console.log(chalk.red('  ⚠ Gatsby ___GATSBY EXPOSED'));
+            console.log(chalk.white(`     ${m.hydration.gatsby.raw.substring(0, 1000)}`));
+            console.log();
+        }
+        if (m.hydration.reactState) {
+            console.log(chalk.red(`  ⚠ React Initial State EXPOSED (${m.hydration.reactState.pattern})`));
+            console.log(chalk.white(`     ${m.hydration.reactState.raw.substring(0, 1000)}`));
+            console.log();
+        }
+        if (m.hydration.svelte) {
+            console.log(chalk.red('  ⚠ SvelteKit Data EXPOSED'));
+            console.log(chalk.white(`     ${m.hydration.svelte.raw.substring(0, 1000)}`));
+            console.log();
+        }
+        if (m.hydration.apollo) {
+            console.log(chalk.red('  ⚠ Apollo GraphQL Cache EXPOSED'));
+            console.log(chalk.white(`     ${m.hydration.apollo.raw.substring(0, 1000)}`));
+            console.log();
+        }
+        if (m.hydration.relay) {
+            console.log(chalk.red('  ⚠ Relay Store EXPOSED'));
+            console.log(chalk.white(`     ${m.hydration.relay.raw.substring(0, 1000)}`));
+            console.log();
+        }
+        if (m.hydration.chunks && m.hydration.chunks.length > 0) {
+            console.log(GOLD(`  📦 Generic Data Chunks (${m.hydration.chunks.length}):`));
+            m.hydration.chunks.forEach(c => {
+                console.log(chalk.white(`     [${c.key}] ${c.data.substring(0, 200)}`));
+            });
+            console.log();
+        }
+
+        const hTypes = ['nextjs', 'nuxt', 'remix', 'gatsby', 'reactState', 'svelte', 'apollo', 'relay'];
+        const found = hTypes.filter(t => m.hydration[t]);
+        if (found.length === 0 && (!m.hydration.chunks || m.hydration.chunks.length === 0)) {
+            console.log(NEON('  ✓ No hydration state exposed — App uses proper code splitting'));
+        }
+        console.log();
+    }
+
+    // ── SOURCE MAPS ──
+    if (m.sourceMaps) {
+        console.log(SEP);
+        console.log(chalk.red.bold('  🗺️  SOURCE MAP EXTRACTION'));
+        console.log(SEP);
+        if (m.sourceMaps.length === 0) {
+            console.log(NEON('  ✓ No source maps exposed — Production build is clean'));
+        } else {
+            console.log(chalk.red.bold(`  ⚠ ${m.sourceMaps.length} SOURCE MAP(S) FOUND — Original code EXPOSED!\n`));
+            m.sourceMaps.forEach((sm, i) => {
+                console.log(chalk.red(`  [Map ${i + 1}] ${sm.jsFile}`));
+                console.log(chalk.white(`     Map URL: ${sm.mapUrl}`));
+                if (sm.sources) {
+                    console.log(GOLD(`     Sources (${sm.sources.length}):`));
+                    sm.sources.slice(0, 15).forEach(s => console.log(DIM(`       └── `) + chalk.white(s)));
+                    if (sm.sources.length > 15) console.log(DIM(`       ... +${sm.sources.length - 15} more`));
+                }
+                if (sm.sourcesContent) {
+                    console.log(GOLD('     Content Preview:'));
+                    sm.sourcesContent.forEach((c, ci) => {
+                        if (c) console.log(DIM(`       ── File ${ci + 1} ──\n`) + chalk.white(`       ${c.substring(0, 300).replace(/\n/g, '\n       ')}`));
+                    });
+                }
+                console.log();
+            });
+        }
+        console.log();
+    }
+
+    // ── API ENDPOINTS ──
+    if (m.apis) {
+        console.log(SEP);
+        console.log(CYAN.bold('  🔌 API ENDPOINT DISCOVERY'));
+        console.log(SEP);
+        if (m.apis.length === 0) {
+            console.log(DIM('  No API endpoints discovered in client code.'));
+        } else {
+            console.log(chalk.white(`  Discovered Endpoints: ${m.apis.length}\n`));
+            m.apis.forEach((api, i) => {
+                const isLast = i === m.apis.length - 1;
+                console.log(DIM(`  ${isLast ? '└──' : '├──'} `) + chalk.white(api));
+            });
+        }
+        console.log();
+    }
+
+    // ── ENVIRONMENT LEAKS ──
+    if (m.envLeaks) {
+        console.log(SEP);
+        console.log(chalk.red.bold('  🔑 ENVIRONMENT VARIABLE & SECRET LEAKS'));
+        console.log(SEP);
+        if (m.envLeaks.length === 0) {
+            console.log(NEON('  ✓ No environment leaks or exposed secrets detected'));
+        } else {
+            console.log(chalk.red.bold(`  ⚠ ${m.envLeaks.length} POTENTIAL LEAK(S) FOUND!\n`));
+            m.envLeaks.forEach((leak, i) => {
+                const isLast = i === m.envLeaks.length - 1;
+                console.log(chalk.red(`  ${isLast ? '└' : '├'}── 🔓 [${leak.type}]`));
+                console.log(chalk.white(`  ${isLast ? ' ' : '│'}      ${leak.match}`));
+            });
+        }
+        console.log();
+    }
+
+    // ── GRAPHQL INTROSPECTION ──
+    if (m.graphql) {
+        console.log(SEP);
+        console.log(CYAN.bold('  📊 GRAPHQL INTROSPECTION'));
+        console.log(SEP);
+        if (!m.graphql.vulnerable) {
+            console.log(NEON('  ✓ GraphQL endpoint not found or introspection disabled'));
+        } else {
+            console.log(chalk.red.bold(`  ⚠ GRAPHQL SCHEMA EXPOSED at ${m.graphql.endpoint}\n`));
+            console.log(chalk.white(`  Query Type:    ${m.graphql.queryType || 'N/A'}`));
+            console.log(chalk.white(`  Mutation Type: ${m.graphql.mutationType || 'N/A'}`));
+            console.log(chalk.white(`  Total Types:   ${m.graphql.totalTypes || 0}\n`));
+            if (m.graphql.types) {
+                console.log(GOLD('  Schema Types:'));
+                m.graphql.types.forEach(t => {
+                    console.log(GOLD(`  ┌── ${t.name} (${t.kind})`));
+                    if (t.fields && t.fields.length > 0) {
+                        t.fields.forEach((f, fi) => {
+                            const isLast = fi === t.fields.length - 1;
+                            console.log(DIM(`  │   ${isLast ? '└──' : '├──'} `) + chalk.white(`${f.name}: ${f.type || 'Unknown'}`));
+                        });
+                    }
+                    console.log(DIM('  └──'));
+                });
+            }
+        }
+        console.log();
+    }
+
+    // ── TOKENS & SESSIONS ──
+    if (m.tokens) {
+        console.log(SEP);
+        console.log(CYAN.bold('  🎫 TOKEN & SESSION EXTRACTION'));
+        console.log(SEP);
+        if (m.tokens.length === 0) {
+            console.log(DIM('  No tokens or session data found.'));
+        } else {
+            console.log(chalk.white(`  Tokens Found: ${m.tokens.length}\n`));
+            m.tokens.forEach(t => {
+                console.log(GOLD(`  [${t.type}]${t.name ? ' ' + t.name : ''}`));
+                console.log(chalk.white(`     Value:    ${t.value || 'N/A'}`));
+                if (t.httpOnly !== undefined) console.log(chalk.white(`     HttpOnly: ${t.httpOnly ? chalk.green('Yes') : chalk.red('No')}`));
+                if (t.secure !== undefined) console.log(chalk.white(`     Secure:   ${t.secure ? chalk.green('Yes') : chalk.red('No')}`));
+                if (t.source) console.log(chalk.white(`     Source:   ${t.source}`));
+            });
+        }
+        console.log();
+    }
+
+    // ── WEBPACK/VITE CHUNK ANALYSIS ──
+    if (m.chunks) {
+        console.log(SEP);
+        console.log(CYAN.bold('  📦 WEBPACK/VITE CHUNK ANALYSIS'));
+        console.log(SEP);
+        console.log(chalk.white(`  Bundler:      ${m.chunks.bundler || 'Unknown'}`));
+        if (m.chunks.publicPath) console.log(chalk.white(`  Public Path:  ${m.chunks.publicPath}`));
+        if (m.chunks.chunks && m.chunks.chunks.length > 0) {
+            console.log(GOLD(`\n  Build Chunks (${m.chunks.chunks.length}):`));
+            m.chunks.chunks.forEach((c, i) => {
+                const isLast = i === m.chunks.chunks.length - 1;
+                const hash = c.hash ? DIM(` [${c.hash}]`) : '';
+                console.log(DIM(`  ${isLast ? '└──' : '├──'} `) + chalk.white(c.file) + hash + DIM(` (${c.type})`));
+            });
+        }
+        if (m.chunks.chunkMap) {
+            console.log(GOLD('\n  Chunk Map:'));
+            console.log(chalk.white(`     ${m.chunks.chunkMap.substring(0, 300)}`));
+        }
+        console.log();
+    }
+
+    // ── JS DEEP ANALYSIS ──
+    if (m.jsDeep) {
+        console.log(SEP);
+        console.log(CYAN.bold('  🔬 JAVASCRIPT DEEP ANALYSIS'));
+        console.log(SEP);
+        console.log(chalk.white(`  Files Analyzed:  ${m.jsDeep.totalFiles}`));
+        console.log(chalk.white(`  Total JS Size:   ${(m.jsDeep.totalSize / 1024).toFixed(1)} KB`));
+
+        if (m.jsDeep.dangerousFunctions.length > 0) {
+            console.log(chalk.red(`\n  ⚠ Dangerous Functions (${m.jsDeep.dangerousFunctions.length}):`));
+            m.jsDeep.dangerousFunctions.forEach(d => {
+                console.log(chalk.red(`     └── ${d.function} in ${d.file}`));
+            });
+        }
+        if (m.jsDeep.hardcodedUrls.length > 0) {
+            console.log(GOLD(`\n  🌐 Hardcoded URLs (${m.jsDeep.hardcodedUrls.length}):`));
+            m.jsDeep.hardcodedUrls.forEach(h => {
+                console.log(DIM(`     └── `) + chalk.white(`${h.url}`) + DIM(` (${h.file})`));
+            });
+        }
+        if (m.jsDeep.interesting.length > 0) {
+            console.log(chalk.yellow(`\n  🔍 Interesting Strings (${m.jsDeep.interesting.length}):`));
+            m.jsDeep.interesting.forEach(s => {
+                console.log(chalk.yellow(`     └── ${s.match}`) + DIM(` → ${s.context.substring(0, 80)}`));
+            });
+        }
+        console.log();
+    }
+
     // ── SUMMARY TREE ──
     console.log(SEP);
     console.log(PINK.bold('  📊 EXTRACTION SUMMARY'));
@@ -494,26 +732,47 @@ function printResults(results) {
     console.log();
 }
 
-// ── TOS Consent ──
+// ── DOUBLE TOS VERIFICATION ──
 async function tosConsent() {
-    console.log(chalk.red.bold('\n  ╔══════════════════════════════════════════════════════════╗'));
-    console.log(chalk.red.bold('  ║  ⚠ OctoScrape — STRICT AUTHORIZATION REQUIRED           ║'));
-    console.log(chalk.red.bold('  ╚══════════════════════════════════════════════════════════╝'));
-    console.log(chalk.red('\n  This tool performs EXPLICIT DATA EXTRACTION from web targets.'));
-    console.log(chalk.red('  Unauthorized use constitutes DATA THEFT and is a CRIMINAL OFFENSE.'));
-    console.log(chalk.red('  You MUST have written authorization from the target owner.\n'));
+    // ── VERIFICATION 1: General Authorization ──
+    console.log(chalk.red.bold('\n  ╔══════════════════════════════════════════════════════════════╗'));
+    console.log(chalk.red.bold('  ║  ⚠ OCTOSCRAPE v2 — DOUBLE AUTHORIZATION REQUIRED           ║'));
+    console.log(chalk.red.bold('  ╚══════════════════════════════════════════════════════════════╝'));
+    console.log(chalk.red('\n  This tool performs AGGRESSIVE DATA EXTRACTION including:'));
+    console.log(chalk.red('  • Source code, hydration state, and bundled code extraction'));
+    console.log(chalk.red('  • Cookie, session token, and CSRF token harvesting'));
+    console.log(chalk.red('  • Sensitive file probing (.env, .git, config, backups)'));
+    console.log(chalk.red('  • API endpoint discovery and GraphQL schema dumping'));
+    console.log(chalk.red('  • Environment variable and API key leak scanning\n'));
 
-    const { consent } = await inquirer.prompt([{
+    console.log(chalk.yellow.bold('  ╔═══════════════════════════════════════════╗'));
+    console.log(chalk.yellow.bold('  ║  STEP 1/2: GENERAL AUTHORIZATION         ║'));
+    console.log(chalk.yellow.bold('  ╚═══════════════════════════════════════════╝'));
+    const { consent1 } = await inquirer.prompt([{
         type: 'confirm',
-        name: 'consent',
-        message: chalk.yellow('I confirm I have EXPLICIT WRITTEN AUTHORIZATION to scrape this target:'),
+        name: 'consent1',
+        message: chalk.yellow('I have LEGAL AUTHORIZATION to extract data from this target:'),
         default: false,
     }]);
+    if (!consent1) { console.log(chalk.red('\n  ❌ Authorization denied. Aborting.\n')); process.exit(0); }
 
-    if (!consent) {
-        console.log(chalk.red('\n  ❌ Authorization not confirmed. Aborting.\n'));
-        process.exit(0);
-    }
+    // ── VERIFICATION 2: Data Extraction Acknowledgment ──
+    console.log(chalk.yellow.bold('\n  ╔═══════════════════════════════════════════╗'));
+    console.log(chalk.yellow.bold('  ║  STEP 2/2: DATA EXTRACTION CONSENT       ║'));
+    console.log(chalk.yellow.bold('  ╚═══════════════════════════════════════════╝'));
+    console.log(chalk.red('  I understand that unauthorized data extraction constitutes:'));
+    console.log(chalk.red('  • DATA THEFT under computer crime legislation'));
+    console.log(chalk.red('  • Violation of GDPR, CCPA, UU PDP, and privacy laws'));
+    console.log(chalk.red('  • Potential TRADE SECRET THEFT if proprietary code is extracted\n'));
+    const { consent2 } = await inquirer.prompt([{
+        type: 'confirm',
+        name: 'consent2',
+        message: chalk.yellow('I accept FULL LEGAL RESPONSIBILITY for all extracted data:'),
+        default: false,
+    }]);
+    if (!consent2) { console.log(chalk.red('\n  ❌ Consent denied. Aborting.\n')); process.exit(0); }
+
+    console.log(NEON('\n  ✓ Double verification passed — Proceeding with extraction...\n'));
 }
 
 // ── CLI Help ──

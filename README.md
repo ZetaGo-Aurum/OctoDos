@@ -10,7 +10,7 @@
 
 <p align="center">
   <b>Professional DDoS Resilience Auditor, Deep Reconnaissance & Web Data Extraction Suite</b><br>
-  <sub>20 Attack Methods · 8 Recon Modules · 9 Scraping Modules · Origin IP Discovery · Cloudflare Bypass</sub>
+  <sub>20 Attack Methods · 14 Recon Modules · 16 Scraping Modules · Hydration Breaking · Double TOS</sub>
 </p>
 
 <p align="center">
@@ -126,14 +126,14 @@ octodos https://target.com 200 300 --auto
 
 ---
 
-## 🔍 OctoRecon — Deep Reconnaissance Engine
+## 🔍 OctoRecon v2 — Advanced Deep Reconnaissance Engine
 
-> Smart multi-module reconnaissance engine that discovers **origin IPs behind Cloudflare/WAF**, enumerates subdomains, audits security headers, scans ports, and fingerprints technology stacks.
+> Smart multi-module reconnaissance engine with **14 scanners**. Discovers **origin IPs behind Cloudflare/WAF**, validates email security, detects cloud providers, tests zone transfer vulnerabilities, and bruteforces directories. **Double TOS verification** required.
 
 ### ⚡ Quick Start
 
 ```bash
-# Interactive menu (recommended)
+# Interactive menu (double TOS verification)
 octorecon
 
 # Direct CLI mode
@@ -143,17 +143,14 @@ octorecon <target> <parameter> [--intensity]
 ### 📋 CLI Examples
 
 ```bash
-# Full global recon
+# Full global recon (8 modules)
 octorecon google.com global --deep
 
-# Find origin IP behind Cloudflare
+# ALL 14 modules at max depth
 octorecon example.com root --deep
 
-# Server-side only
+# Server infrastructure scan
 octorecon 192.168.1.1 server
-
-# Maximum coverage
-octorecon https://target.com all --deep
 
 # Quick check
 octorecon example.com .
@@ -163,12 +160,11 @@ octorecon example.com .
 
 | Parameter | Modules | Use Case |
 |:----------|:--------|:---------|
-| `global` | DNS, Subdomains, WAF, Headers, Tech, SSL | General overview |
-| `root` | DNS, Subs, WAF, **Origin IP**, SSL, Ports, Headers, Tech | Deep root analysis |
-| `server` | DNS, **Origin IP**, SSL, Ports, WAF | Server infrastructure |
-| `client` | Headers, Tech, SSL | Client-side security |
-| `both` | All modules combined | Global + Root |
-| `all` | Every module | Maximum coverage |
+| `global` | DNS, Subs, WAF, Headers, Tech, SSL, Email, Cloud | General overview |
+| `root` | **ALL 14 modules** | Deep root analysis |
+| `server` | DNS, Origin, SSL, Ports, WAF, Cloud, H2, Zone | Server infrastructure |
+| `client` | Headers, Tech, SSL, HTTP/2 | Client-side security |
+| `all` | Every module at full intensity | Maximum coverage |
 | `.` | Headers, Tech, WAF | Quick check |
 
 ### 🔥 Intensity Levels
@@ -177,87 +173,112 @@ octorecon example.com .
 |:-----|:------------|
 | `--light` | Fast scan — basic wordlist, top 20 ports |
 | `--normal` | Standard depth (default) |
-| `--deep` | 130+ subdomain wordlist, top 40 ports, extended probing |
+| `--deep` | 130+ subdomain wordlist, top 50 ports, 80+ dir paths |
 
-### 🧠 Reconnaissance Modules
+### 🧠 Core Modules (8)
 
 | Module | Capabilities |
 |:-------|:-------------|
 | 📡 **DNS Engine** | A, AAAA, MX, NS, TXT, SOA, CNAME, SRV, Reverse DNS |
-| 🌐 **Subdomain Scanner** | 50 common + 80 deep brute-force via DNS resolution |
-| 🛡️ **WAF Detector** | Cloudflare, Akamai, Sucuri, AWS WAF, Imperva, F5, Barracuda, Varnish, Fastly, CloudFront, DDoS-Guard |
-| 🎯 **Origin IP Finder** | DNS history, MX record bypass, SSL SAN analysis, IPv6, origin subdomain probing (`origin.*`, `direct.*`, `backend.*`) |
-| 🔒 **SSL/TLS Audit** | Protocol version, cipher suite, certificate chain, SAN, fingerprint, expiry |
-| 📋 **Headers Audit** | HSTS, CSP, X-Frame-Options, XSS-Protection, Referrer-Policy, Permissions-Policy |
-| 🚪 **Port Scanner** | Top 20-40 TCP ports with batch concurrency (1.5s timeout) |
-| ⚙️ **Tech Detector** | Server, CMS (WordPress/Joomla/Drupal), frameworks (Next.js/Laravel/Django/Express), libraries (React/Vue/Angular/jQuery) |
+| 🌐 **Subdomain Scanner** | 130+ wordlist brute-force via batch DNS resolution |
+| 🛡️ **WAF Detector** | 18 WAF/CDN vendors: Cloudflare, Akamai, Sucuri, AWS WAF/Shield, Imperva, F5, Varnish, Fastly, CloudFront, DDoS-Guard, Wordfence, ModSecurity, Azure, GCP |
+| 🎯 **Origin IP Finder** | DNS, MX bypass, SSL SAN, IPv6, NS records, origin subdomain probing |
+| 🔒 **SSL/TLS Audit** | Protocol, cipher, cert chain, SAN, fingerprint, key size, expiry |
+| 📋 **Headers Audit** | 12 security headers + CORS policy (COEP, COOP, CORP) |
+| 🚪 **Port Scanner** | Top 50 TCP ports with batch concurrency (1.2s timeout) |
+| ⚙️ **Tech Detector** | 35+ technologies: CMS, frameworks, libraries, CSS, analytics, backend |
+
+### 💀 Advanced Modules (6) — NEW
+
+| Module | Capabilities |
+|:-------|:-------------|
+| 📝 **WHOIS Lookup** | Domain registration data via RDAP (registrar, status, events, NS) |
+| 📧 **Email Security** | SPF/DKIM/DMARC validation, 10 DKIM selectors, MX records |
+| ☁️ **Cloud Detection** | 12 providers: AWS, Azure, GCP, Vercel, Netlify, Heroku, Cloudflare Pages, Railway, Fly.io, Render, DigitalOcean |
+| 🔗 **HTTP/2 Fingerprint** | ALPN negotiation, TLS version, cipher, Alt-Svc header |
+| 🗺️ **Zone Transfer** | AXFR vulnerability test against all nameservers |
+| 📂 **Dir Bruteforce** | 80+ paths: admin panels, API docs, config files, debug endpoints |
 
 ---
 
-## 🕷️ OctoScrape — Web Data Extraction Engine
+## 🕷️ OctoScrape v2 — Aggressive Web Data Extraction Engine
 
-> ⚠️ **DATA EXTRACTION TOOL** — OctoScrape performs explicit data collection from web targets. **Authorization is MANDATORY.** Unauthorized use constitutes data theft.
+> ⚠️ **AGGRESSIVE DATA EXTRACTION TOOL** — OctoScrape v2 performs deep data collection including **hydration state breaking**, **source map extraction**, and **API key leak scanning**. **Double TOS verification** required. Unauthorized use = **DATA THEFT**.
 
-> Smart multi-module extraction engine that scrapes source code, cookies, security configurations, sensitive files, form data, and metadata. **Integrates with OctoRecon** for WAF pre-scan before extraction.
+> 16-module extraction engine that breaks through **Next.js/Nuxt/Remix/Gatsby hydration** to extract raw application state, discovers **source maps** exposing original code, finds **leaked API keys**, dumps **GraphQL schemas**, and harvests **session tokens**. Integrates with OctoRecon v2.
 
 ### ⚡ Quick Start
 
 ```bash
-# Interactive menu (recommended)
+# Interactive menu (double TOS verification)
 octoscrape
 
-# Direct CLI mode
+# Direct CLI mode (terminal shows FULL results, flags = export/save)
 octoscrape <url> <parameter> [--json|--txt|--zip]
 ```
 
 ### 📋 CLI Examples
 
 ```bash
-# Full extraction with directory output
+# Full aggressive extraction
 octoscrape https://example.com all --zip
 
-# Server-side data extraction
-octoscrape https://target.com server --json
+# Root analysis with sensitive file probing
+octoscrape https://target.com root --json
 
-# Quick security check
-octoscrape https://target.com . --txt
+# Client-side hydration breaking
+octoscrape https://target.com client --txt
 
-# Root analysis (includes sensitive file probing)
-octoscrape https://target.com root --zip
+# Quick security snapshot
+octoscrape https://target.com .
 ```
 
 ### 🎯 Extraction Parameters
 
 | Parameter | Modules | Use Case |
 |:----------|:--------|:---------|
-| `global` | Source, Assets, Cookies, Security, Tech, Links, Meta | General extraction |
-| `root` | All 9 modules + sensitive file probing | Deep root extraction |
-| `server` | Security, Tech, Configs, Cookies | Server infrastructure |
-| `client` | Source, Assets, Forms, Links, Meta | Client-side data |
+| `global` | Source, Assets, Cookies, Security, Tech, Links, Meta, Hydration, Chunks | General extraction |
+| `root` | **ALL 16 modules** | Deep aggressive extraction |
+| `server` | Security, Tech, Configs, Cookies, GraphQL, Tokens | Server infrastructure |
+| `client` | Source, Assets, Forms, Links, Meta, Hydration, Chunks, APIs, EnvLeaks, JSDeep | Client-side breaking |
 | `both/all` | Every extraction module | Maximum coverage |
-| `.` | Security, Meta, Cookies | Quick check |
+| `.` | Security, Meta, Cookies, Tokens | Quick check |
 
 ### 💾 Output Formats
+
+> **Terminal always shows FULL exhaustive results.** Output flags are for **export/save only.**
 
 | Flag | Format | Description |
 |:-----|:-------|:------------|
 | `--json` | JSON | Structured data file (default) |
 | `--txt` | TXT | Plain text report |
-| `--zip` | Directory | Separate file per module (source.html, cookies.json, etc.) |
+| `--zip` | Directory | Separate file per module — open media files directly |
 
-### 🔬 Extraction Modules
+### 🔬 Core Modules (9)
 
 | Module | Capabilities |
 |:-------|:-------------|
-| 📄 **Source Code** | Full HTML, inline JS/CSS, HTML comments, size analysis |
-| 🖼️ **Page Assets** | JavaScript files, CSS, images, fonts, media, iframes |
-| 🍪 **Cookies** | All cookies with HttpOnly, Secure, SameSite, Domain, Path, Expiry flags |
-| 🔒 **Security Stack** | Response headers audit, CORS policy, CSP analysis, server/powered-by |
-| ⚙️ **Tech Stack** | Server, CMS, frameworks, libraries (via OctoRecon integration) |
-| 📂 **Config Files** | Probes 50+ sensitive paths: `.env`, `.git/config`, `robots.txt`, `wp-config`, `package.json`, `swagger.json`, admin panels, backups |
-| 📝 **Forms & Inputs** | Form actions, methods, hidden fields, input types, enctype |
-| 🔗 **Links & Sitemap** | Internal/external links, anchor map, email harvesting |
-| 🏷️ **Metadata & SEO** | Title, description, Open Graph, Twitter Cards, JSON-LD schemas, canonical |
+| 📄 **Source Code** | Full HTML, inline JS/CSS snippets, HTML comments (info leak) |
+| 🖼️ **Page Assets** | JS, CSS, images, fonts, media, iframes — full URL tree |
+| 🍪 **Cookies** | All cookies with HttpOnly, Secure, SameSite, Domain, Path, Expiry, Max-Age |
+| 🔒 **Security Stack** | 12 headers audit, CORS policy, CSP directive parsing, all response headers |
+| ⚙️ **Tech Stack** | 35+ technologies grouped as tree (Server, CMS, Framework, Library, CSS, Analytics) |
+| 📂 **Config Files** | 75+ sensitive paths: `.env`, `.git`, `robots.txt`, `wp-config`, `swagger`, `Dockerfile`, backups, admin panels |
+| 📝 **Forms & Inputs** | Actions, methods, enctype, every input with type/name/id/value/placeholder, hidden field + password markers |
+| 🔗 **Links & Sitemap** | Internal/external links, anchor fragments, email harvesting |
+| 🏷️ **Meta & SEO** | Title, description, keywords, OG tags, Twitter Cards, JSON-LD schemas, canonical, favicon |
+
+### 💀 Aggressive Modules (7) — NEW
+
+| Module | Capabilities |
+|:-------|:-------------|
+| 💉 **Hydration Decoder** | Breaks Next.js `__NEXT_DATA__`, Nuxt `__NUXT__`, Remix `__remixContext`, Gatsby `___GATSBY`, React `__INITIAL_STATE__`, SvelteKit, Apollo cache, Relay store |
+| 🗺️ **Source Map Extractor** | Finds `.map` files → **original source code** with file tree and content preview |
+| 🔌 **API Discovery** | Extracts fetch/axios/XMLHttpRequest endpoints from client bundles |
+| 🔑 **Env Leak Scanner** | Detects Google API keys, AWS Access keys, Stripe keys, GitHub tokens, JWT, Slack tokens, generic secrets |
+| 📊 **GraphQL Introspection** | Schema dump: query/mutation types, all type fields exposed |
+| 🎫 **Token Extraction** | CSRF tokens, session cookies, authorization headers, nonces |
+| 📦 **Chunk Analyzer** | Webpack/Vite/Parcel/Rollup detection, chunk hashes, public path, build structure |
 
 ---
 
@@ -266,14 +287,14 @@ octoscrape https://target.com root --zip
 ```
 OctoDos/
 ├── index.js              # OctoDos CLI entry point
-├── octorecon.js           # OctoRecon CLI entry point
-├── octoscrape.js          # OctoScrape CLI entry point
+├── octorecon.js           # OctoRecon v2 CLI (14 modules, double TOS)
+├── octoscrape.js          # OctoScrape v2 CLI (16 modules, double TOS)
 ├── package.json           # v2.0.0 — triple binaries
 ├── lib/
 │   ├── l7.js              # L7 Tentacle Engine (10 methods, burst-mode)
 │   ├── l4.js              # L4 Tentacle Engine (10 methods, OOM-safe)
-│   ├── recon-engine.js    # OctoRecon deep recon engine (8 modules)
-│   ├── scrape-engine.js   # OctoScrape extraction engine (9 modules)
+│   ├── recon-engine.js    # OctoRecon v2 engine (14 modules)
+│   ├── scrape-engine.js   # OctoScrape v2 engine (16 modules)
 │   ├── antiwaf.js         # Anti-WAF v4.0 — browser fingerprint evasion
 │   ├── proxy.js           # Proxy scraper — 14 sources, 8K+ proxies
 │   ├── recon.js           # OctoDos internal recon module
@@ -296,9 +317,11 @@ OctoDos/
 
 > **This suite is designed for authorized penetration testing and security auditing only.**
 >
+> All tools require **DOUBLE TOS VERIFICATION** — two consecutive consent prompts before execution.
+>
 > Unauthorized use against systems you do not own or have explicit written permission to test is **illegal** and constitutes a **criminal offense** under computer crime laws worldwide.
 >
-> **OctoScrape Warning:** Data extraction without authorization constitutes **data theft** and may violate privacy laws including GDPR, CCPA, UU PDP, and equivalent legislation.
+> **OctoScrape Warning:** Data extraction without authorization constitutes **data theft** and may violate privacy laws including GDPR, CCPA, UU PDP, and equivalent legislation. Hydration state breaking, source map extraction, and API key scanning carry **additional legal responsibilities**.
 >
 > By using OctoDos, OctoRecon, or OctoScrape, you agree to the [Terms of Service](TERMS_OF_SERVICE.md) and accept full legal responsibility for your actions.
 

@@ -1,31 +1,36 @@
-# Terms of Service — OctoDos
+# Terms of Service — OctoDos Suite (OctoDos + OctoRecon)
 
-**Effective Date:** February 2026  
+**Effective Date:** February 2026 — **Perpetual**  
 **Author:** ZetaGo-Aurum  
-**Version:** 1.0.0
+**Applies to:** All versions — past, present, and future (v1.0.0, v2.0.0, and beyond)
+
+> **These Terms of Service are perpetual and apply to ALL versions of the OctoDos Suite, including OctoDos (DDoS Resilience Auditor) and OctoRecon (Deep Reconnaissance Engine). Updating, upgrading, or modifying the Software does not invalidate or reset these terms. They remain in full effect for as long as you use any version of the Software.**
 
 ---
 
 ## 1. Acceptance of Terms
 
-By downloading, installing, or using OctoDos ("the Software"), you agree to be bound by these Terms of Service ("ToS"). If you do not agree, you must immediately cease all use and delete the Software.
+By downloading, installing, or using OctoDos and/or OctoRecon (collectively "the Software"), you agree to be bound by these Terms of Service ("ToS"). If you do not agree, you must immediately cease all use and delete the Software. These terms apply universally to **every version, fork, and derivative** of the Software.
 
 ## 2. Authorized Use Only
 
-OctoDos is designed **exclusively** for:
+OctoDos and OctoRecon are designed **exclusively** for:
 - **Authorized penetration testing** with explicit written consent from the target owner
 - **Security auditing** of systems you own or have documented permission to test
+- **Reconnaissance and intelligence gathering** on authorized targets only
 - **Educational purposes** in controlled, isolated environments
-- **Research** into DDoS resilience and defense mechanisms
+- **Research** into DDoS resilience, defense mechanisms, and network security
 
 ### Prohibited Uses
-You **MAY NOT** use OctoDos to:
+You **MAY NOT** use OctoDos or OctoRecon to:
 - Attack, disrupt, or degrade any system without explicit authorization
 - Perform denial-of-service attacks against production infrastructure without consent
+- Conduct reconnaissance or scanning of systems without proper authorization
 - Violate any local, national, or international laws or regulations
 - Harass, threaten, or cause harm to individuals or organizations
 - Conduct any activity that may result in criminal prosecution
 - Distribute the tool with the intent to facilitate illegal activities
+- Use gathered intelligence for malicious purposes
 
 ## 3. User Responsibility
 
@@ -248,16 +253,25 @@ Users must comply with **ALL** applicable cybercrime and computer fraud legislat
 
 ---
 
-## 8. Termination
+## 8. Scope and Perpetuity
+
+These Terms of Service:
+- Apply to **ALL versions** of OctoDos and OctoRecon (v1.x, v2.x, and all future releases)
+- Remain in full effect **indefinitely** regardless of version updates, upgrades, or modifications
+- Cover **all features, modules, engines, and tools** included in any version of the OctoDos Suite
+- Apply to **forks, derivatives, and modified copies** of the Software
+- Survive the discontinuation, transfer, or archival of the Software
+
+## 9. Termination
 
 ZetaGo-Aurum reserves the right to revoke your license to use the Software at any time if these terms are violated.
 
-## 9. Changes to Terms
+## 10. Changes to Terms
 
-These Terms may be updated at any time. Continued use constitutes acceptance of changed terms.
+These Terms may be updated at any time. Updated terms apply retroactively to all versions. Continued use constitutes acceptance of changed terms.
 
 ---
 
-**By using OctoDos, you confirm that you have read, understood, and agree to these Terms of Service and all referenced legislation.**
+**By using OctoDos and/or OctoRecon, you confirm that you have read, understood, and agree to these Terms of Service and all referenced legislation. These terms are perpetual and apply to every version of the Software.**
 
-*ZetaGo-Aurum © 2026*
+*ZetaGo-Aurum © 2026 — All rights reserved*

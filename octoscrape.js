@@ -115,119 +115,383 @@ async function saveZIP(results, url) {
     return outDir;
 }
 
-// ── Result Printer ──
+// ═══════════════════════════════════════════════════
+// FULL EXHAUSTIVE RESULT PRINTER
+// Terminal ALWAYS shows EVERYTHING.
+// Output flags (--json/--txt/--zip) are just for export/save.
+// ═══════════════════════════════════════════════════
 function printResults(results) {
-    console.log(PINK.bold('\n  ╔══════════════════════════════════════════════════╗'));
-    console.log(PINK.bold('  ║   🕷️  OCTOSCRAPE EXTRACTION REPORT                ║'));
-    console.log(PINK.bold('  ╚══════════════════════════════════════════════════╝\n'));
+    const SEP = DIM('  ────────────────────────────────────────────────────────────────');
 
-    // WAF
+    console.log(PINK.bold('\n  ╔═══════════════════════════════════════════════════════════════╗'));
+    console.log(PINK.bold('  ║        🕷️  OCTOSCRAPE — FULL EXTRACTION REPORT               ║'));
+    console.log(PINK.bold('  ╚═══════════════════════════════════════════════════════════════╝'));
+    console.log(DIM(`  Target:    ${results.target}`));
+    console.log(DIM(`  Time:      ${results.timestamp}`));
+    console.log();
+
+    // ── WAF ──
+    console.log(SEP);
+    console.log(GOLD.bold('  🛡️  WAF / CDN DETECTION'));
+    console.log(SEP);
     if (results.waf && results.waf.length > 0) {
-        console.log(GOLD(`  ⚠ WAF Detected: ${results.waf.join(', ')}`));
+        results.waf.forEach(w => console.log(chalk.red(`  ⚠  ${w} — DETECTED`)));
     } else {
-        console.log(NEON('  ✓ No WAF Detected — Target is exposed'));
+        console.log(NEON('  ✓  No WAF/CDN detected — Target appears unprotected'));
     }
     console.log();
 
     const m = results.modules;
 
-    // Source
+    // ── SOURCE CODE ──
     if (m.source && !m.source.error) {
-        console.log(CYAN.bold('  📄 Source Code:'));
-        console.log(DIM(`     HTML Size:   ${(m.source.htmlSize / 1024).toFixed(1)} KB`));
-        console.log(DIM(`     Scripts:     ${m.source.inlineScripts} inline`));
-        console.log(DIM(`     Styles:      ${m.source.inlineStyles} inline`));
-        console.log(DIM(`     Comments:    ${m.source.comments.length} found`));
+        console.log(SEP);
+        console.log(CYAN.bold('  📄 SOURCE CODE ANALYSIS'));
+        console.log(SEP);
+        console.log(chalk.white(`  HTML Document Size:    ${(m.source.htmlSize / 1024).toFixed(1)} KB (${m.source.htmlSize.toLocaleString()} bytes)`));
+        console.log(chalk.white(`  Inline Scripts:        ${m.source.inlineScripts}`));
+        console.log(chalk.white(`  Inline Styles:         ${m.source.inlineStyles}`));
+        console.log(chalk.white(`  HTML Comments:         ${m.source.comments.length}`));
         if (m.source.comments.length > 0) {
-            m.source.comments.slice(0, 3).forEach(c => console.log(chalk.yellow(`     💬 ${c.substring(0, 80)}`)));
+            console.log(GOLD('\n  📝 HTML Comments (potential info leak):'));
+            m.source.comments.forEach((c, i) => {
+                console.log(chalk.yellow(`  [${i + 1}] ${c.substring(0, 200)}`));
+            });
+        }
+        if (m.source.scripts && m.source.scripts.length > 0) {
+            console.log(GOLD(`\n  📜 Inline Script Snippets (${m.source.scripts.length}):`));
+            m.source.scripts.forEach((s, i) => {
+                console.log(DIM(`  ── Script ${i + 1} ──`));
+                console.log(chalk.white(`  ${s.substring(0, 300).replace(/\n/g, '\n  ')}`));
+                if (s.length > 300) console.log(DIM(`  ... (${s.length} chars total)`));
+            });
+        }
+        if (m.source.styles && m.source.styles.length > 0) {
+            console.log(GOLD(`\n  🎨 Inline Style Snippets (${m.source.styles.length}):`));
+            m.source.styles.forEach((s, i) => {
+                console.log(DIM(`  ── Style ${i + 1} ──`));
+                console.log(chalk.white(`  ${s.substring(0, 200).replace(/\n/g, '\n  ')}`));
+            });
         }
         console.log();
     }
 
-    // Assets
+    // ── ASSETS ──
     if (m.assets) {
-        console.log(CYAN.bold('  🖼️  Page Assets:'));
-        console.log(DIM(`     JavaScript:  ${m.assets.js.length} files`));
-        m.assets.js.slice(0, 3).forEach(j => console.log(DIM(`       → ${j.substring(0, 80)}`)));
-        console.log(DIM(`     CSS:         ${m.assets.css.length} files`));
-        console.log(DIM(`     Images:      ${m.assets.images.length} files`));
-        console.log(DIM(`     Iframes:     ${m.assets.iframes.length}`));
-        console.log();
-    }
+        console.log(SEP);
+        console.log(CYAN.bold('  🖼️  PAGE ASSETS TREE'));
+        console.log(SEP);
 
-    // Cookies
-    if (m.cookies && m.cookies.length > 0) {
-        console.log(CYAN.bold(`  🍪 Cookies: ${m.cookies.length}`));
-        m.cookies.forEach(c => {
-            const flags = Object.entries(c.flags).filter(([, v]) => v).map(([k, v]) => typeof v === 'boolean' ? k : `${k}=${v}`).join(', ');
-            console.log(DIM(`     ${c.name.padEnd(25)}`), chalk.white(flags || 'No flags'));
-        });
-        console.log();
-    }
+        const total = m.assets.js.length + m.assets.css.length + m.assets.images.length + m.assets.fonts.length + m.assets.media.length + m.assets.iframes.length;
+        console.log(chalk.white(`  Total Assets: ${total}\n`));
 
-    // Security
-    if (m.security && m.security.securityHeaders) {
-        console.log(CYAN.bold('  🔒 Security Stack:'));
-        for (const [header, value] of Object.entries(m.security.securityHeaders)) {
-            const icon = typeof value === 'string' && value.startsWith('❌') ? chalk.red('✗') : chalk.green('✓');
-            console.log(`     ${icon} ${DIM(header.padEnd(30))} ${chalk.white(typeof value === 'string' ? value.substring(0, 50) : value)}`);
+        if (m.assets.js.length > 0) {
+            console.log(GOLD(`  📦 JavaScript Files (${m.assets.js.length}):`));
+            m.assets.js.forEach((j, i) => {
+                const isLast = i === m.assets.js.length - 1;
+                console.log(DIM(`  ${isLast ? '└──' : '├──'} `) + chalk.white(j));
+            });
+            console.log();
         }
-        console.log(DIM(`     Server:      ${m.security.server}`));
-        console.log(DIM(`     Powered By:  ${m.security.poweredBy}`));
+
+        if (m.assets.css.length > 0) {
+            console.log(GOLD(`  🎨 CSS Stylesheets (${m.assets.css.length}):`));
+            m.assets.css.forEach((c, i) => {
+                const isLast = i === m.assets.css.length - 1;
+                console.log(DIM(`  ${isLast ? '└──' : '├──'} `) + chalk.white(c));
+            });
+            console.log();
+        }
+
+        if (m.assets.images.length > 0) {
+            console.log(GOLD(`  🖼️  Images (${m.assets.images.length}):`));
+            m.assets.images.forEach((img, i) => {
+                const isLast = i === m.assets.images.length - 1;
+                console.log(DIM(`  ${isLast ? '└──' : '├──'} `) + chalk.white(img));
+            });
+            console.log();
+        }
+
+        if (m.assets.fonts.length > 0) {
+            console.log(GOLD(`  🔤 Fonts (${m.assets.fonts.length}):`));
+            m.assets.fonts.forEach(f => console.log(DIM('  └── ') + chalk.white(f)));
+            console.log();
+        }
+
+        if (m.assets.media.length > 0) {
+            console.log(GOLD(`  🎬 Media (${m.assets.media.length}):`));
+            m.assets.media.forEach(v => console.log(DIM('  └── ') + chalk.white(v)));
+            console.log();
+        }
+
+        if (m.assets.iframes.length > 0) {
+            console.log(GOLD(`  📺 Iframes (${m.assets.iframes.length}):`));
+            m.assets.iframes.forEach(f => console.log(DIM('  └── ') + chalk.white(f)));
+            console.log();
+        }
+    }
+
+    // ── COOKIES ──
+    if (m.cookies) {
+        console.log(SEP);
+        console.log(CYAN.bold('  🍪 COOKIES'));
+        console.log(SEP);
+        if (m.cookies.length === 0) {
+            console.log(DIM('  No cookies set by target.'));
+        } else {
+            console.log(chalk.white(`  Total Cookies: ${m.cookies.length}\n`));
+            m.cookies.forEach((c, i) => {
+                console.log(GOLD(`  [Cookie ${i + 1}] ${c.name}`));
+                console.log(chalk.white(`     Value:      ${c.value.substring(0, 120)}${c.value.length > 120 ? '...' : ''}`));
+                console.log(chalk.white(`     HttpOnly:   ${c.flags.httpOnly ? chalk.red('Yes ⚠') : chalk.green('No')}`));
+                console.log(chalk.white(`     Secure:     ${c.flags.secure ? chalk.green('Yes ✓') : chalk.red('No ⚠')}`));
+                console.log(chalk.white(`     SameSite:   ${c.flags.sameSite || chalk.red('Not set ⚠')}`));
+                if (c.flags.domain) console.log(chalk.white(`     Domain:     ${c.flags.domain}`));
+                if (c.flags.path) console.log(chalk.white(`     Path:       ${c.flags.path}`));
+                if (c.flags.expires) console.log(chalk.white(`     Expires:    ${c.flags.expires}`));
+                if (c.flags.maxAge) console.log(chalk.white(`     Max-Age:    ${c.flags.maxAge}s`));
+            });
+        }
         console.log();
     }
 
-    // Tech
+    // ── SECURITY STACK ──
+    if (m.security) {
+        console.log(SEP);
+        console.log(CYAN.bold('  🔒 SECURITY STACK'));
+        console.log(SEP);
+
+        if (m.security.statusCode) console.log(chalk.white(`  HTTP Status:     ${m.security.statusCode}`));
+        console.log(chalk.white(`  Server:          ${m.security.server || 'Hidden'}`));
+        console.log(chalk.white(`  X-Powered-By:    ${m.security.poweredBy || 'Hidden'}`));
+
+        if (m.security.securityHeaders) {
+            console.log(GOLD('\n  📋 Security Headers Audit:'));
+            for (const [header, value] of Object.entries(m.security.securityHeaders)) {
+                const isPresent = typeof value === 'string' && !value.startsWith('❌');
+                const icon = isPresent ? chalk.green('✓') : chalk.red('✗');
+                console.log(`     ${icon} ${chalk.white(header.padEnd(32))} ${isPresent ? NEON(value) : chalk.red(value)}`);
+            }
+        }
+
+        if (m.security.cors) {
+            console.log(GOLD('\n  🌐 CORS Policy:'));
+            for (const [key, val] of Object.entries(m.security.cors)) {
+                const isSet = val !== 'Not set';
+                console.log(`     ${isSet ? chalk.green('✓') : chalk.red('✗')} ${chalk.white(key.padEnd(40))} ${isSet ? NEON(val) : chalk.red(val)}`);
+            }
+        }
+
+        if (m.security.csp) {
+            console.log(GOLD('\n  🛡️  Content-Security-Policy:'));
+            const directives = m.security.csp.split(';').map(d => d.trim()).filter(Boolean);
+            directives.forEach(d => {
+                const [directive, ...values] = d.split(/\s+/);
+                console.log(`     ${chalk.cyan(directive.padEnd(25))} ${chalk.white(values.join(' '))}`);
+            });
+        }
+
+        if (m.security.allHeaders) {
+            console.log(GOLD('\n  📡 All Response Headers:'));
+            for (const [key, val] of Object.entries(m.security.allHeaders)) {
+                const v = Array.isArray(val) ? val.join('; ') : String(val);
+                console.log(`     ${DIM(key.padEnd(35))} ${chalk.white(v.substring(0, 120))}`);
+            }
+        }
+        console.log();
+    }
+
+    // ── TECH STACK ──
     if (m.tech && m.tech.length > 0) {
-        console.log(CYAN.bold('  ⚙️  Tech Stack:'));
-        m.tech.forEach(t => console.log(DIM(`     [${t.name}]`), chalk.white(t.value)));
-        console.log();
-    }
+        console.log(SEP);
+        console.log(CYAN.bold('  ⚙️  TECHNOLOGY STACK'));
+        console.log(SEP);
+        console.log(chalk.white(`  Detected Technologies: ${m.tech.length}\n`));
 
-    // Configs
-    if (m.configs && m.configs.length > 0) {
-        console.log(chalk.red.bold(`  📂 Sensitive Files Found: ${m.configs.length}`));
-        m.configs.forEach(c => {
-            console.log(chalk.red(`     🔓 ${c.path.padEnd(30)}`), DIM(`${c.statusCode} | ${(c.size / 1024).toFixed(1)}KB`));
+        // Group by category
+        const categories = {};
+        m.tech.forEach(t => {
+            const cat = t.name || 'Other';
+            if (!categories[cat]) categories[cat] = [];
+            categories[cat].push(t.value);
         });
-        console.log();
-    }
 
-    // Forms
-    if (m.forms && m.forms.length > 0) {
-        console.log(CYAN.bold(`  📝 Forms: ${m.forms.length}`));
-        m.forms.forEach((f, i) => {
-            console.log(DIM(`     Form ${i + 1}: ${f.method} → ${f.action || '(self)'} | ${f.inputs.length} inputs`));
-            f.inputs.filter(inp => inp.type === 'hidden').forEach(inp => {
-                console.log(chalk.yellow(`       🔑 HIDDEN: ${inp.name} = ${inp.value}`));
+        const catKeys = Object.keys(categories);
+        catKeys.forEach((cat, ci) => {
+            const isLast = ci === catKeys.length - 1;
+            const prefix = isLast ? '└──' : '├──';
+            console.log(DIM(`  ${prefix} `) + GOLD(cat));
+            categories[cat].forEach((val, vi) => {
+                const childPrefix = isLast ? '    ' : '│   ';
+                const childBranch = vi === categories[cat].length - 1 ? '└──' : '├──';
+                console.log(DIM(`  ${childPrefix}${childBranch} `) + chalk.white(val));
             });
         });
         console.log();
     }
 
-    // Links
-    if (m.links) {
-        console.log(CYAN.bold('  🔗 Links:'));
-        console.log(DIM(`     Internal:    ${m.links.totalInternal}`));
-        console.log(DIM(`     External:    ${m.links.totalExternal}`));
-        console.log(DIM(`     Emails:      ${m.links.emails.length}`));
-        if (m.links.emails.length > 0) {
-            m.links.emails.slice(0, 5).forEach(e => console.log(chalk.yellow(`     📧 ${e}`)));
+    // ── CONFIG / SENSITIVE FILES ──
+    if (m.configs) {
+        console.log(SEP);
+        console.log(chalk.red.bold('  📂 SENSITIVE FILES & CONFIG PROBING'));
+        console.log(SEP);
+
+        if (m.configs.length === 0) {
+            console.log(NEON('  ✓  No sensitive files found (all probed paths returned 403/404)'));
+        } else {
+            console.log(chalk.red.bold(`  ⚠  ${m.configs.length} SENSITIVE FILE(S) ACCESSIBLE!\n`));
+            m.configs.forEach((c, i) => {
+                const isLast = i === m.configs.length - 1;
+                console.log(chalk.red(`  ${isLast ? '└' : '├'}── 🔓 ${c.path}`));
+                console.log(chalk.white(`  ${isLast ? ' ' : '│'}      Status: ${c.statusCode} | Size: ${(c.size / 1024).toFixed(1)} KB | URL: ${c.url}`));
+                if (c.body) {
+                    const preview = c.body.substring(0, 300).replace(/\n/g, '\n  ' + (isLast ? ' ' : '│') + '      ');
+                    console.log(DIM(`  ${isLast ? ' ' : '│'}      ── Content Preview ──`));
+                    console.log(DIM(`  ${isLast ? ' ' : '│'}      ${preview}`));
+                    if (c.body.length > 300) console.log(DIM(`  ${isLast ? ' ' : '│'}      ... (${(c.size / 1024).toFixed(1)} KB total)`));
+                }
+            });
         }
         console.log();
     }
 
-    // Meta
-    if (m.meta) {
-        console.log(CYAN.bold('  🏷️  Metadata:'));
-        if (m.meta.title) console.log(DIM('     Title:       '), chalk.white(m.meta.title));
-        if (m.meta.description) console.log(DIM('     Desc:        '), chalk.white(m.meta.description.substring(0, 80)));
-        if (m.meta.canonical) console.log(DIM('     Canonical:   '), chalk.white(m.meta.canonical));
-        if (m.meta.author) console.log(DIM('     Author:      '), chalk.white(m.meta.author));
-        if (m.meta.robots) console.log(DIM('     Robots:      '), chalk.white(m.meta.robots));
-        if (m.meta.structuredData.length > 0) console.log(DIM(`     JSON-LD:     ${m.meta.structuredData.length} schemas`));
+    // ── FORMS ──
+    if (m.forms) {
+        console.log(SEP);
+        console.log(CYAN.bold('  📝 FORMS & INPUT FIELDS'));
+        console.log(SEP);
+
+        if (m.forms.length === 0) {
+            console.log(DIM('  No forms found on page.'));
+        } else {
+            console.log(chalk.white(`  Total Forms: ${m.forms.length}\n`));
+            m.forms.forEach((f, i) => {
+                console.log(GOLD(`  ┌── Form ${i + 1}`));
+                console.log(chalk.white(`  │   Action:    ${f.action || '(self/current page)'}`));
+                console.log(chalk.white(`  │   Method:    ${f.method}`));
+                if (f.enctype) console.log(chalk.white(`  │   Enctype:   ${f.enctype}`));
+                console.log(chalk.white(`  │   Inputs:    ${f.inputs.length}`));
+
+                if (f.inputs.length > 0) {
+                    console.log(DIM('  │'));
+                    f.inputs.forEach((inp, j) => {
+                        const isLast = j === f.inputs.length - 1;
+                        const branch = isLast ? '└──' : '├──';
+                        const isHidden = inp.type === 'hidden';
+                        const isPassword = inp.type === 'password';
+
+                        let line = `  │   ${branch} `;
+                        if (isHidden) line += chalk.red(`🔑 HIDDEN  `);
+                        else if (isPassword) line += chalk.yellow(`🔐 PASSWD  `);
+                        else line += DIM(`[${inp.type.padEnd(8)}] `);
+
+                        line += chalk.white(`name="${inp.name || ''}" `);
+                        if (inp.id) line += DIM(`id="${inp.id}" `);
+                        if (inp.value) line += chalk.yellow(`value="${inp.value}" `);
+                        if (inp.placeholder) line += DIM(`placeholder="${inp.placeholder}"`);
+
+                        console.log(line);
+                    });
+                }
+                console.log(DIM('  └──'));
+                console.log();
+            });
+        }
+    }
+
+    // ── LINKS ──
+    if (m.links) {
+        console.log(SEP);
+        console.log(CYAN.bold('  🔗 LINK MAP & SITEMAP'));
+        console.log(SEP);
+
+        console.log(chalk.white(`  Internal Links:  ${m.links.totalInternal}`));
+        console.log(chalk.white(`  External Links:  ${m.links.totalExternal}`));
+        console.log(chalk.white(`  Anchor Tags:     ${m.links.anchors ? m.links.anchors.length : 0}`));
+        console.log(chalk.white(`  Email Addresses: ${m.links.emails.length}`));
+
+        if (m.links.internal && m.links.internal.length > 0) {
+            console.log(GOLD(`\n  🏠 Internal Links (${m.links.internal.length}):`));
+            m.links.internal.forEach((l, i) => {
+                const isLast = i === m.links.internal.length - 1;
+                console.log(DIM(`  ${isLast ? '└──' : '├──'} `) + chalk.white(l));
+            });
+        }
+
+        if (m.links.external && m.links.external.length > 0) {
+            console.log(GOLD(`\n  🌍 External Links (${m.links.external.length}):`));
+            m.links.external.forEach((l, i) => {
+                const isLast = i === m.links.external.length - 1;
+                console.log(DIM(`  ${isLast ? '└──' : '├──'} `) + chalk.white(l));
+            });
+        }
+
+        if (m.links.anchors && m.links.anchors.length > 0) {
+            console.log(GOLD(`\n  ⚓ Anchor Fragments (${m.links.anchors.length}):`));
+            m.links.anchors.forEach(a => console.log(DIM('  └── ') + chalk.white(a)));
+        }
+
+        if (m.links.emails && m.links.emails.length > 0) {
+            console.log(GOLD(`\n  📧 Email Addresses (${m.links.emails.length}):`));
+            m.links.emails.forEach(e => console.log(chalk.yellow(`  └── ${e}`)));
+        }
         console.log();
     }
+
+    // ── METADATA & SEO ──
+    if (m.meta) {
+        console.log(SEP);
+        console.log(CYAN.bold('  🏷️  METADATA & SEO'));
+        console.log(SEP);
+
+        console.log(chalk.white(`  Title:         ${m.meta.title || chalk.red('MISSING ⚠')}`));
+        console.log(chalk.white(`  Description:   ${m.meta.description || chalk.red('MISSING ⚠')}`));
+        console.log(chalk.white(`  Keywords:      ${m.meta.keywords || DIM('Not set')}`));
+        console.log(chalk.white(`  Author:        ${m.meta.author || DIM('Not set')}`));
+        console.log(chalk.white(`  Robots:        ${m.meta.robots || DIM('Not set')}`));
+        console.log(chalk.white(`  Canonical:     ${m.meta.canonical || DIM('Not set')}`));
+        console.log(chalk.white(`  Favicon:       ${m.meta.favicon || DIM('Not found')}`));
+        console.log(chalk.white(`  Charset:       ${m.meta.charset || DIM('Not specified')}`));
+        console.log(chalk.white(`  Viewport:      ${m.meta.viewport || DIM('Not set')}`));
+
+        if (m.meta.og && Object.keys(m.meta.og).length > 0) {
+            console.log(GOLD('\n  📘 Open Graph Tags:'));
+            for (const [key, val] of Object.entries(m.meta.og)) {
+                console.log(`     ${DIM(key.padEnd(25))} ${chalk.white(val)}`);
+            }
+        }
+
+        if (m.meta.twitter && Object.keys(m.meta.twitter).length > 0) {
+            console.log(GOLD('\n  🐦 Twitter Card Tags:'));
+            for (const [key, val] of Object.entries(m.meta.twitter)) {
+                console.log(`     ${DIM(key.padEnd(25))} ${chalk.white(val)}`);
+            }
+        }
+
+        if (m.meta.structuredData && m.meta.structuredData.length > 0) {
+            console.log(GOLD(`\n  📊 JSON-LD Structured Data (${m.meta.structuredData.length} schema(s)):`));
+            m.meta.structuredData.forEach((sd, i) => {
+                console.log(DIM(`\n  ── Schema ${i + 1} ──`));
+                const pretty = JSON.stringify(sd, null, 2).split('\n');
+                pretty.forEach(line => console.log(chalk.white(`  ${line}`)));
+            });
+        }
+        console.log();
+    }
+
+    // ── SUMMARY TREE ──
+    console.log(SEP);
+    console.log(PINK.bold('  📊 EXTRACTION SUMMARY'));
+    console.log(SEP);
+    const moduleNames = Object.keys(m);
+    moduleNames.forEach((mod, i) => {
+        const isLast = i === moduleNames.length - 1;
+        let count = '✓';
+        if (Array.isArray(m[mod])) count = `${m[mod].length} items`;
+        else if (m[mod] && typeof m[mod] === 'object' && m[mod].error) count = chalk.red('Error');
+        console.log(DIM(`  ${isLast ? '└──' : '├──'} `) + NEON(mod.padEnd(15)) + chalk.white(count));
+    });
+    console.log();
 }
 
 // ── TOS Consent ──

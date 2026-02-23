@@ -65,7 +65,7 @@ octodos https://example.com 100 60
 octodos https://target.com 500 120 --high
 
 # Maximum firepower — 3x threads
-octodos 192.168.1.1:80 1000 60 --crit
+octodos 192.*.*.*.*.* 1000 60 --crit
 
 # Adaptive mode — auto-balances load
 octodos https://target.com 200 300 --auto

@@ -1,36 +1,59 @@
-# Terms of Service — OctoDos Suite (OctoDos + OctoRecon)
+# Terms of Service — OctoDos Suite (OctoDos + OctoRecon + OctoScrape)
 
 **Effective Date:** February 2026 — **Perpetual**  
 **Author:** ZetaGo-Aurum  
 **Applies to:** All versions — past, present, and future (v1.0.0, v2.0.0, and beyond)
 
-> **These Terms of Service are perpetual and apply to ALL versions of the OctoDos Suite, including OctoDos (DDoS Resilience Auditor) and OctoRecon (Deep Reconnaissance Engine). Updating, upgrading, or modifying the Software does not invalidate or reset these terms. They remain in full effect for as long as you use any version of the Software.**
+> **These Terms of Service are perpetual and apply to ALL versions of the OctoDos Suite, including OctoDos (DDoS Resilience Auditor), OctoRecon (Deep Reconnaissance Engine), and OctoScrape (Web Data Extraction Engine). Updating, upgrading, or modifying the Software does not invalidate or reset these terms. They remain in full effect for as long as you use any version of the Software.**
 
 ---
 
 ## 1. Acceptance of Terms
 
-By downloading, installing, or using OctoDos and/or OctoRecon (collectively "the Software"), you agree to be bound by these Terms of Service ("ToS"). If you do not agree, you must immediately cease all use and delete the Software. These terms apply universally to **every version, fork, and derivative** of the Software.
+By downloading, installing, or using OctoDos, OctoRecon, and/or OctoScrape (collectively "the Software"), you agree to be bound by these Terms of Service ("ToS"). If you do not agree, you must immediately cease all use and delete the Software. These terms apply universally to **every version, fork, and derivative** of the Software.
 
 ## 2. Authorized Use Only
 
-OctoDos and OctoRecon are designed **exclusively** for:
+OctoDos, OctoRecon, and OctoScrape are designed **exclusively** for:
 - **Authorized penetration testing** with explicit written consent from the target owner
 - **Security auditing** of systems you own or have documented permission to test
 - **Reconnaissance and intelligence gathering** on authorized targets only
+- **Authorized data extraction and web scraping** with documented permission from the target owner
 - **Educational purposes** in controlled, isolated environments
 - **Research** into DDoS resilience, defense mechanisms, and network security
 
 ### Prohibited Uses
-You **MAY NOT** use OctoDos or OctoRecon to:
+You **MAY NOT** use OctoDos, OctoRecon, or OctoScrape to:
 - Attack, disrupt, or degrade any system without explicit authorization
 - Perform denial-of-service attacks against production infrastructure without consent
 - Conduct reconnaissance or scanning of systems without proper authorization
+- **Extract, scrape, harvest, or collect data from any website or system without explicit written authorization from the owner**
+- **Access, download, or copy source code, configurations, databases, or sensitive files without authorization**
+- **Circumvent access controls, authentication mechanisms, or rate limiting to extract data**
 - Violate any local, national, or international laws or regulations
 - Harass, threaten, or cause harm to individuals or organizations
 - Conduct any activity that may result in criminal prosecution
 - Distribute the tool with the intent to facilitate illegal activities
-- Use gathered intelligence for malicious purposes
+- Use gathered intelligence or extracted data for malicious purposes
+- **Sell, distribute, or otherwise monetize scraped data without the target owner's consent**
+
+### ⚠️ Special Notice: OctoScrape — Data Extraction
+
+**OctoScrape performs explicit data extraction** from web targets, including but not limited to: source code, cookies, session tokens, configuration files, form data, metadata, email addresses, and sensitive file probing. **This constitutes data collection that may be regulated under data protection laws worldwide.**
+
+Using OctoScrape **without authorization** may constitute:
+- **Data theft** under computer crime legislation
+- **Unauthorized access** to computer systems and data
+- **Violation of privacy laws** (GDPR, CCPA, PDPA, UU PDP, etc.)
+- **Violation of Terms of Service** of the target website
+- **Trade secret theft** if proprietary code or configurations are extracted
+
+**You are REQUIRED to:**
+- Obtain **explicit written authorization** before using OctoScrape on any target
+- Securely store and handle all extracted data in compliance with applicable data protection laws
+- Delete extracted data upon completion of the authorized security audit
+- Report any discovered vulnerabilities responsibly to the target owner
+- **Never use extracted data for competitive intelligence, identity theft, fraud, or any unlawful purpose**
 
 ## 3. User Responsibility
 

@@ -3,19 +3,20 @@
   <img src="https://img.shields.io/badge/node-16+-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" alt="Node" />
   <img src="https://img.shields.io/badge/platform-Win%20%7C%20Linux%20%7C%20macOS%20%7C%20Termux-blueviolet?style=for-the-badge" alt="Platform" />
   <img src="https://img.shields.io/badge/license-MIT-green?style=for-the-badge" alt="License" />
-  <img src="https://img.shields.io/badge/tools-OctoDos%20+%20OctoRecon-FF6B6B?style=for-the-badge" alt="Tools" />
+  <img src="https://img.shields.io/badge/tools-OctoDos%20+%20OctoRecon%20+%20OctoScrape-FF6B6B?style=for-the-badge" alt="Tools" />
 </p>
 
 <h1 align="center">🐙 OctoDos Suite v2.0.0</h1>
 
 <p align="center">
-  <b>Professional DDoS Resilience Auditor & Deep Reconnaissance Engine</b><br>
-  <sub>20 Attack Methods · 8 Recon Modules · Origin IP Discovery · Cloudflare Bypass</sub>
+  <b>Professional DDoS Resilience Auditor, Deep Reconnaissance & Web Data Extraction Suite</b><br>
+  <sub>20 Attack Methods · 8 Recon Modules · 9 Scraping Modules · Origin IP Discovery · Cloudflare Bypass</sub>
 </p>
 
 <p align="center">
   <a href="#-octodos--ddos-resilience-auditor">OctoDos</a> •
   <a href="#-octorecon--deep-reconnaissance-engine">OctoRecon</a> •
+  <a href="#%EF%B8%8F-octoscrape--web-data-extraction-engine">OctoScrape</a> •
   <a href="#-installation">Install</a> •
   <a href="#-legal-disclaimer">Legal</a>
 </p>
@@ -193,20 +194,89 @@ octorecon example.com .
 
 ---
 
+## 🕷️ OctoScrape — Web Data Extraction Engine
+
+> ⚠️ **DATA EXTRACTION TOOL** — OctoScrape performs explicit data collection from web targets. **Authorization is MANDATORY.** Unauthorized use constitutes data theft.
+
+> Smart multi-module extraction engine that scrapes source code, cookies, security configurations, sensitive files, form data, and metadata. **Integrates with OctoRecon** for WAF pre-scan before extraction.
+
+### ⚡ Quick Start
+
+```bash
+# Interactive menu (recommended)
+octoscrape
+
+# Direct CLI mode
+octoscrape <url> <parameter> [--json|--txt|--zip]
+```
+
+### 📋 CLI Examples
+
+```bash
+# Full extraction with directory output
+octoscrape https://example.com all --zip
+
+# Server-side data extraction
+octoscrape https://target.com server --json
+
+# Quick security check
+octoscrape https://target.com . --txt
+
+# Root analysis (includes sensitive file probing)
+octoscrape https://target.com root --zip
+```
+
+### 🎯 Extraction Parameters
+
+| Parameter | Modules | Use Case |
+|:----------|:--------|:---------|
+| `global` | Source, Assets, Cookies, Security, Tech, Links, Meta | General extraction |
+| `root` | All 9 modules + sensitive file probing | Deep root extraction |
+| `server` | Security, Tech, Configs, Cookies | Server infrastructure |
+| `client` | Source, Assets, Forms, Links, Meta | Client-side data |
+| `both/all` | Every extraction module | Maximum coverage |
+| `.` | Security, Meta, Cookies | Quick check |
+
+### 💾 Output Formats
+
+| Flag | Format | Description |
+|:-----|:-------|:------------|
+| `--json` | JSON | Structured data file (default) |
+| `--txt` | TXT | Plain text report |
+| `--zip` | Directory | Separate file per module (source.html, cookies.json, etc.) |
+
+### 🔬 Extraction Modules
+
+| Module | Capabilities |
+|:-------|:-------------|
+| 📄 **Source Code** | Full HTML, inline JS/CSS, HTML comments, size analysis |
+| 🖼️ **Page Assets** | JavaScript files, CSS, images, fonts, media, iframes |
+| 🍪 **Cookies** | All cookies with HttpOnly, Secure, SameSite, Domain, Path, Expiry flags |
+| 🔒 **Security Stack** | Response headers audit, CORS policy, CSP analysis, server/powered-by |
+| ⚙️ **Tech Stack** | Server, CMS, frameworks, libraries (via OctoRecon integration) |
+| 📂 **Config Files** | Probes 50+ sensitive paths: `.env`, `.git/config`, `robots.txt`, `wp-config`, `package.json`, `swagger.json`, admin panels, backups |
+| 📝 **Forms & Inputs** | Form actions, methods, hidden fields, input types, enctype |
+| 🔗 **Links & Sitemap** | Internal/external links, anchor map, email harvesting |
+| 🏷️ **Metadata & SEO** | Title, description, Open Graph, Twitter Cards, JSON-LD schemas, canonical |
+
+---
+
 ## 🏗️ Project Structure
 
 ```
 OctoDos/
 ├── index.js              # OctoDos CLI entry point
 ├── octorecon.js           # OctoRecon CLI entry point
-├── package.json           # v2.0.0 — dual binaries
+├── octoscrape.js          # OctoScrape CLI entry point
+├── package.json           # v2.0.0 — triple binaries
 ├── lib/
 │   ├── l7.js              # L7 Tentacle Engine (10 methods, burst-mode)
-│   ├── l4.js              # L4 Tentacle Engine (10 methods)
+│   ├── l4.js              # L4 Tentacle Engine (10 methods, OOM-safe)
 │   ├── recon-engine.js    # OctoRecon deep recon engine (8 modules)
+│   ├── scrape-engine.js   # OctoScrape extraction engine (9 modules)
 │   ├── antiwaf.js         # Anti-WAF v4.0 — browser fingerprint evasion
 │   ├── proxy.js           # Proxy scraper — 14 sources, 8K+ proxies
-│   ├── recon.js            # OctoDos internal recon module
+│   ├── recon.js           # OctoDos internal recon module
 │   ├── auditor.js         # Defense recommendations engine
 │   ├── banner.js          # UI components and banners
 │   ├── logger.js          # Forensic audit logger
@@ -224,11 +294,13 @@ OctoDos/
 
 ## ⚠️ Legal Disclaimer
 
-> **This tool is designed for authorized penetration testing only.**
+> **This suite is designed for authorized penetration testing and security auditing only.**
 >
 > Unauthorized use against systems you do not own or have explicit written permission to test is **illegal** and constitutes a **criminal offense** under computer crime laws worldwide.
 >
-> By using OctoDos or OctoRecon, you agree to the [Terms of Service](TERMS_OF_SERVICE.md) and accept full legal responsibility for your actions.
+> **OctoScrape Warning:** Data extraction without authorization constitutes **data theft** and may violate privacy laws including GDPR, CCPA, UU PDP, and equivalent legislation.
+>
+> By using OctoDos, OctoRecon, or OctoScrape, you agree to the [Terms of Service](TERMS_OF_SERVICE.md) and accept full legal responsibility for your actions.
 
 ---
 
@@ -240,5 +312,5 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 <p align="center">
   <b>Created with 🐙 by <a href="https://github.com/ZetaGo-Aurum">ZetaGo-Aurum</a></b><br>
-  <sub>OctoDos Suite v2.0.0 — Stress Testing & Reconnaissance Redefined</sub>
+  <sub>OctoDos Suite v2.0.0 — Stress Testing, Reconnaissance & Data Extraction Redefined</sub>
 </p>

@@ -1,11 +1,12 @@
 {
   "name": "octodos",
   "version": "2.0.0",
-  "description": "OctoDos + OctoRecon — Professional DDoS Resilience Auditor & Deep Reconnaissance Engine with 20 attack methods and 8 recon modules.",
+  "description": "OctoDos + OctoRecon + OctoScrape — DDoS Resilience Auditor, Deep Reconnaissance, & Web Data Extraction Suite.",
   "main": "index.js",
   "bin": {
     "octodos": "./index.js",
-    "octorecon": "./octorecon.js"
+    "octorecon": "./octorecon.js",
+    "octoscrape": "./octoscrape.js"
   },
   "scripts": {
     "start": "node index.js",

@@ -1,12 +1,12 @@
 {
-  "name": "octodos",
-  "version": "2.0.0",
+  "name": "@zetagoaurum-dev/octodos",
+  "version": "2.0.1",
   "description": "OctoDos + OctoRecon + OctoScrape — DDoS Resilience Auditor, Deep Reconnaissance, & Web Data Extraction Suite.",
   "main": "index.js",
   "bin": {
-    "octodos": "./index.js",
-    "octorecon": "./octorecon.js",
-    "octoscrape": "./octoscrape.js"
+    "octodos": "index.js",
+    "octorecon": "octorecon.js",
+    "octoscrape": "octoscrape.js"
   },
   "scripts": {
     "start": "node index.js",
